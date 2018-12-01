@@ -28,30 +28,30 @@ They all have class representation too, all deriving from the `Number` class:
 
 They share similar methods, that can be used to cast them to related types, or compare:
 
-byte byteValue()
-short shortValue()
-int intValue()
-long longValue()
-float floatValue()
-double doubleValue()
-int compareTo(Byte anotherByte)
-int compareTo(Double anotherDouble)
-int compareTo(Float anotherFloat)
-int compareTo(Integer anotherInteger)
-int compareTo(Long anotherLong)
-int compareTo(Short anotherShort)
-boolean equals(Object obj)
+* byte byteValue()
+* short shortValue()
+* int intValue()
+* long longValue()
+* float floatValue()
+* double doubleValue()
+* int compareTo(Byte anotherByte)
+* int compareTo(Double anotherDouble)
+* int compareTo(Float anotherFloat)
+* int compareTo(Integer anotherInteger)
+* int compareTo(Long anotherLong)
+* int compareTo(Short anotherShort)
+* boolean equals(Object obj)
 
 They also have methods useful for converting to and from String:
 
-static Integer decode(String s) -	Decodes a string into an integer. Can accept string representations of decimal, octal, or hexadecimal numbers as input.
-static int parseInt(String s) - Returns an integer (decimal only).
-static int parseInt(String s, int radix) - Returns an integer, given a string representation of decimal, binary, octal, or hexadecimal (radix equals 10, 2, 8, or 16 respectively) numbers as input.
-String toString() - Returns a String object representing the value of this Integer.
-static String toString(int i) - Returns a String object representing the specified integer.
-static Integer valueOf(int i) - Returns an Integer object holding the value of the specified primitive.
-static Integer valueOf(String s) - Returns an Integer object holding the value of the specified string representation.
-static Integer valueOf(String s, int radix) - Returns an Integer object holding the integer value of the specified string representation, parsed with the value of radix. For example, if s = "333" and radix = 8, the method returns the base-ten integer equivalent of the octal number 333.
+* static Integer decode(String s) -	Decodes a string into an integer. Can accept string representations of decimal, octal, or hexadecimal numbers as input.
+* static int parseInt(String s) - Returns an integer (decimal only).
+* static int parseInt(String s, int radix) - Returns an integer, given a string representation of decimal, binary, octal, or hexadecimal (radix equals 10, 2, 8, or 16 respectively) numbers as input.
+* String toString() - Returns a String object representing the value of this Integer.
+* static String toString(int i) - Returns a String object representing the specified integer.
+* static Integer valueOf(int i) - Returns an Integer object holding the value of the specified primitive.
+* static Integer valueOf(String s) - Returns an Integer object holding the value of the specified string representation.
+* static Integer valueOf(String s, int radix) - Returns an Integer object holding the integer value of the specified string representation, parsed with the value of radix. For example, if s = "333" and radix = 8, the method returns the base-ten integer equivalent of the octal number 333.
 
 Finally, the Number classes include constants and useful class methods. The MIN_VALUE and MAX_VALUE.
 
