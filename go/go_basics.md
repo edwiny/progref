@@ -1,4 +1,4 @@
-# TL;DR intro into go
+# Basics of Go
 
 ## Packages
 ```
@@ -226,33 +226,6 @@ const (
       )
 ```
 
-
-## Loops
-
-Go has only 1 loop construct, the for loop:
-
-```
-func main() {
-    sum := 0
-    for i := 0; i < 10; i++ {
-        sum += i
-    }
-    fmt.Println(sum)
-}
-
-```
-The init and post statements are optional:
-
-func main() {
-        sum := 1
-        for ; sum < 1000; {
-        // or you can do
-        //for  sum < 1000 {
-           sum += sum
-        }
-        fmt.Println(sum)
-}
-
 ## Conditionals
 
 ### if
@@ -280,7 +253,8 @@ Go has only 1 loop construct
 for i := 0; i < 10; i++ {
     sum += i
   }
-``
+```
+
 
 init and post is optional:
 
@@ -288,19 +262,7 @@ init and post is optional:
   for ; sum < 1000; {
     sum += sum
   }
-  ```
-
-
-
-
-
-
-
-
-
-
-
-
+```
 
 
 # Types
@@ -348,8 +310,6 @@ slice1 := []int{1, 2, 3, 4, 5}
 slice3 := slice1[:2]   # returns two elements from the start of the array, len=2 cap=5 values=[1 2]
 slice4 := slice1[3:5]  # returns the last 2 elements and capacity is reduced: len=2 cap=2 values=[4 5]
 ```
-
-
 
 
 A slice literal is like an array literal without the length.
