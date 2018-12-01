@@ -945,9 +945,12 @@ Typically, the path should reflect the location of the repo, e.g. like this:
 
 Set these in your shell's .profile:
 
+```
 GOPATH="location to your workspace"
 # if you want to easily execute go commands that you've built:
 PATH="$PAtH:$GOPATH/bin"
+```
+
 
 ## Build cycle
 
