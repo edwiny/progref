@@ -881,7 +881,9 @@ Function returning the error should look something like this:
 func Sqrt(x float64) (float64, error) {
     return 0, nil
 }
-```# Building Go 
+```
+
+# Building Go 
 
 ## Code Organisation
 
