@@ -1,5 +1,6 @@
 # Java Syntax
 
+NOTE most of these notes have been assembled from the [Oracle Java Tutorials](https://docs.oracle.com/javase/tutorial/)
 
 
 
@@ -536,7 +537,7 @@ public Polygon polygonFrom(Point... corners) {
     // polygon connecting the Points
 }
 
- ```
+```
 
 The method can be called either with an array or with a sequence of arguments
 
@@ -1492,14 +1493,8 @@ There is a lof of existing exceptions classes part of the standard java runtime,
 * Does your code throw more than one related exception?
 * If you use someone else's exceptions, will users have access to those exceptions? A similar question is, should your package be independent and self-contained?
 
+### checked vs unchecked
+
+If a client can reasonably be expected to recover from an exception, make it a checked exception. If a client cannot do anything to recover from the exception, make it an unchecked exception.
 
 -------------------------------------------------------------------------------
-
-## Standard Library
-
-### Documentation sources
-
-The official Java 8 SE API ref: https://docs.oracle.com/javase/8/docs/api/index.html
-
--------------------------------------------------------------------------------
-
