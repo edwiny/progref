@@ -1,0 +1,10 @@
+total 48
+-rw-r--r--  1 syoung  staff   506  2 Dec 15:54 ElevenComputeAreaCircle.java
+-rw-r--r--  1 syoung  staff   648  5 Dec 08:58 SevenDisplayMultiplicationSummary.java
+drwxr-xr-x  3 syoung  staff   102  5 Dec 08:59 ..
+-rw-r--r--  1 syoung  staff  1329  5 Dec 09:29 TwentyConvertToHex.java
+-rw-r--r--  1 syoung  staff   641  6 Dec 08:36 TwentyTwoBinaryToDecimal.java
+-rw-r--r--  1 syoung  staff   482  6 Dec 08:50 ThirtySevenReverseString.java
+-rw-r--r--  1 syoung  staff   288 13 Dec 18:22 FortyFiveSizeOfFile.java
+-rw-r--r--  1 syoung  staff     0 13 Dec 18:23 hello.txt
+drwxr-xr-x  9 syoung  staff   306 13 Dec 18:23 .
