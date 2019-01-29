@@ -602,6 +602,7 @@ SortedSet
 ### Collectinn
 
 The `Collection` interface contains general methods:
+
 * a 'conversion constructor' that enables you to convert a colletion of one subtype to another
 * `int size()`
 * `boolean isEmpty()`
@@ -611,6 +612,7 @@ The `Collection` interface contains general methods:
 * `Iterator<E> iterator()`
 
 Bulk operation methods:
+
 * `containsAll(Collection<?> c)`
 * `addAll(Collection<? extends E> c)`
 * `boolean removeAll(Collection<?> c)`
