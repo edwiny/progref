@@ -1125,8 +1125,8 @@ ioutil.ReadFile is the simplest form:
 Alternatively, to manage your own memory, need to use stat to get size of file first and allocate sufficient memory.
 
 
- ```
- package main
+```
+package main
 
 import (
         "fmt"
