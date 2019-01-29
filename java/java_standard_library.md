@@ -226,6 +226,9 @@ The classes are `ObjectInputStream` and `ObjectOutputStream`. They have magic to
 
 NIO.2 was introduced in Java SE 7 and is used for manipulating the file system.
 
+Prior to the Java SE 7 release, the java.io.File class was the mechanism used for file I/O, but it had several drawbacks - not scalable, did not consitently throw exceptions.
+
+
 ### Path class
 
 Primary entry point is the `Path` class, which represents a location in the filesystem.
@@ -297,6 +300,372 @@ System.out.format("%s %s %s%n",
 ```
 
 
+### Method 1: Reading and Writing files by Slurping
+
+Use the `readAllBytes(Path)` or `readAllLines(Path, Charset)` mehods
+
+These should not be used for reading large files!
+
+```
+Path file = ...;
+byte[] fileArray;
+fileArray = Files.readAllBytes(file);
+```
+
+Or readling by lines:
+
+```
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+
+public class Slurp {
+    public static void main(String[] args) {
+
+        List<String> lines ;
+        try {
+            lines = Files.readAllLines(Paths.get("src/io/testfile.txt"), StandardCharsets.UTF_8);
+            for(String s: lines) {
+                System.out.printf("Read line: [%s]\n", s);
+            }
+        } catch (java.io.IOException e) {
+            System.out.printf("Could not read from file - %s\n", e.getMessage());
+            System.exit(1);
+        }
+    }
+}
+```
+
+### Method 2: Buffered IO for text files
+
+Use the `newBufferedReader` and `Writer` methods:
+
+```
+Charset charset = Charset.forName("US-ASCII");
+try (BufferedReader reader = Files.newBufferedReader(file, charset)) {
+    String line = null;
+    while ((line = reader.readLine()) != null) {
+        System.out.println(line);
+    }
+} catch (IOException x) {
+    System.err.format("IOException: %s%n", x);
+}
+```
+
+When writing, you can pass in a `OpenOption` arg to `newBufferedWriter` to control creation behaviour.
+
+```
+Charset charset = Charset.forName("US-ASCII");
+String s = ...;
+try (BufferedWriter writer = Files.newBufferedWriter(file, charset)) {
+    writer.write(s, 0, s.length());
+} catch (IOException x) {
+    System.err.format("IOException: %s%n", x);
+}
+```
+
+### Method 3: Unbuffered Streams Interoperable with java.io classes
+
+Use the `newOutputStream(Path, OpenOption...)` method.
+
+Example:
+
+```
+import static java.nio.file.StandardOpenOption.*;
+import java.nio.file.*;
+import java.io.*;
+
+public class LogFileTest {
+
+  public static void main(String[] args) {
+
+    // Convert the string to a
+    // byte array.
+    String s = "Hello World! ";
+    byte data[] = s.getBytes();
+    Path p = Paths.get("./logfile.txt");
+
+    try (OutputStream out = new BufferedOutputStream(
+      Files.newOutputStream(p, CREATE, APPEND))) {
+      out.write(data, 0, data.length);
+    } catch (IOException x) {
+      System.err.println(x);
+    }
+  }
+}
+```
+
+## Method 4: Using Channel IO
+
+Channel IO enables buffered reading and writing and also seeking.
+
+The following two methods are available:
+* `newByteChannel(Path, OpenOption...)`
+* `newByteChannel(Path, Set<? extends OpenOption>, FileAttribute<?>...)`
+
+These return  an instance of a `SeekableByteChannel`. With a default file system, you can cast this seekable byte channel to a FileChannel providing access to more advanced features such mapping a region of the file directly into memory for faster access, locking a region of the file so other processes cannot access it, or reading and writing bytes from an absolute position without affecting the channel's current position.
+
+Example (Unix/POSIX only):
+
+```
+import static java.nio.file.StandardOpenOption.*;
+import java.nio.*;
+import java.nio.channels.*;
+import java.nio.file.*;
+import java.nio.file.attribute.*;
+import java.io.*;
+import java.util.*;
+
+public class LogFilePermissionsTest {
+
+  public static void main(String[] args) {
+  
+    // Create the set of options for appending to the file.
+    Set<OpenOption> options = new HashSet<OpenOption>();
+    options.add(APPEND);
+    options.add(CREATE);
+
+    // Create the custom permissions attribute.
+    Set<PosixFilePermission> perms =
+      PosixFilePermissions.fromString("rw-r-----");
+    FileAttribute<Set<PosixFilePermission>> attr =
+      PosixFilePermissions.asFileAttribute(perms);
+
+    // Convert the string to a ByteBuffer.
+    String s = "Hello World! ";
+    byte data[] = s.getBytes();
+    ByteBuffer bb = ByteBuffer.wrap(data);
+    
+    Path file = Paths.get("./permissions.log");
+
+    try (SeekableByteChannel sbc =
+      Files.newByteChannel(file, options, attr)) {
+      sbc.write(bb);
+    } catch (IOException x) {
+      System.out.println("Exception thrown: " + x);
+    }
+  }
+}
+
+```
+
+### Creating empty files
+
+Use `createFile(Path, FileAttribute<?>)` method.
+
+Example:
+
+```
+Path file = ...;
+try {
+    // Create the empty file with default permissions, etc.
+    Files.createFile(file);
+} catch (FileAlreadyExistsException x) {
+    System.err.format("file named %s" +
+        " already exists%n", file);
+} catch (IOException x) {
+    // Some other sort of failure, such as permissions.
+    System.err.format("createFile error: %s%n", x);
+}
+```
+
+### Creating temp files
+
+Use the `createTempFile(Path, String, String, FileAttribute<?>)` method.
+
+Example:
+
+```
+try {
+    Path tempFile = Files.createTempFile(null, ".myapp");
+    System.out.format("The temporary file" +
+        " has been created: %s%n", tempFile)
+;
+} catch (IOException x) {
+    System.err.format("IOException: %s%n", x);
+}
+
+```
+
+### Listing Directory Contents
+
+Use the `newDirectoryStream(Path)` method.
+
+This method returns an object that implements the `DirectoryStream` interface. The class that implements the DirectoryStream interface also implements `Iterable`.
+
+Note the object is also a stream so must be propery closed, preferably with a try-with-resources block.
+
+Exmaple:
+
+```
+Path dir = ...;
+try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+    for (Path file: stream) {
+        System.out.println(file.getFileName());
+    }
+} catch (IOException | DirectoryIteratorException x) {
+    // IOException can never be thrown by the iteration.
+    // In this snippet, it can only be thrown by newDirectoryStream.
+    System.err.println(x);
+}
+```
+
+You can also filter like:
+
+```
+DirectoryStream<Path> stream =
+     Files.newDirectoryStream(dir, "*.{java,class,jar}")
+```
+
+### Walking directory tree
+
+You need to implement a class with the `FileVisitor` interface.
+
+It contains these methods that are all optional to implement:
+* `preVisitDirectory` – Invoked before a directory's entries are visited.
+* `postVisitDirectory` – Invoked after all the entries in a directory are visited. If any errors are encountered, the specific exception is passed to the method.
+* `visitFile` – Invoked on the file being visited. The file's BasicFileAttributes is passed to the method, or you can use the file attributes package to read a specific set of attributes. For example, you can choose to read the file's DosFileAttributeView to determine if the file has the "hidden" bit set.
+* `visitFileFailed` – Invoked when the file cannot be accessed. The specific exception is passed to the method. You can choose whether to throw the exception, print it to the console or a log file, and so on.
+
+Instead of implementing the FileVisitor interface, you can extend the `SimpleFileVisitor` class. This class, which implements the FileVisitor interface, visits all files in a tree and throws an IOError when an error is encountered. You can extend this class and override only the methods that you require.
+
+Then call with either of these
+
+* `walkFileTree(Path, FileVisitor)`
+* `walkFileTree(Path, Set<FileVisitOption>, int, FileVisitor)`
+
+Behaviour such as early termination, skipping sub trees or files, can be controlled with the return codes of the interface methods.
+
+### Watching for file changes
+
+Java supports file change notification integration for filesystems that support it through the `WatchService` class.
+
+See https://docs.oracle.com/javase/tutorial/essential/io/notification.html for further details.
+
+### Get the default file system
+
+```
+PathMatcher matcher =
+    FileSystems.getDefault().getPathMatcher("glob:*.*");
+```
+
+### Getting path seperator
+
+```
+String separator = FileSystems.getDefault().getSeparator();
+```
+
+### Getting root volumes (aka File Stores)
+
+
+To retrieve a list of all the file stores for the file system, you can use the getFileStores method. This method returns an Iterable, which allows you to use the enhanced for statement to iterate over all the root directories.
+
+```
+for (FileStore store: FileSystems.getDefault().getFileStores()) {
+   ...
+}
+```
+If you want to retrive the file store where a particular file is located, use the getFileStore method in the Files class, as follows:
+
+```
+Path file = ...;
+FileStore store= Files.getFileStore(file);
+```
+
+-------------------------------------------------------------------------------
+
+## Collections
+
+Collections are used to store, retrieve, manipulate, and communicate aggregate data. It contains interfaces, implmementations, and algorithms.
+
+### Interfaces
+
+```
+                           Collection                              Map
+                               |                                    |
+ --------------------------------------------------                 |
+ |               |             |                  |             SortedMap        
+Set            List         Queue                Deque 
+ |
+SortedSet
+```
+* Collection - top level interface
+* Set - can only contain unique items
+* List - array-like sequence
+* Queue - FIFO
+* Deque - Can be either FIFO or LIFO
+* Map   - Maps values to keys
+* SortedSet - maintains elements in order
+* SortedMap - keys are ordered
+
+### Collectinn
+
+The `Collection` interface contains general methods:
+* a 'conversion constructor' that enables you to convert a colletion of one subtype to another
+* `int size()`
+* `boolean isEmpty()`
+* `boolean contains(Object element)`
+* `boolean add(E element)` - returns true if the Collection changes as a result of the call
+* `boolean remove(Object element)` - return true if the Collection was modified as a result.
+* `Iterator<E> iterator()`
+
+Bulk operation methods:
+* `containsAll(Collection<?> c)`
+* `addAll(Collection<? extends E> c)`
+* `boolean removeAll(Collection<?> c)`
+* `boolean retainAll(Collection<?> c)`
+* `void clear()`
+* `Object[] toArray()`
+* `<T> T[] toArray(T[] a)`
+* `Stream<E> stream()` (JDK8 and later) - for "aggregate operations"
+* `Stream<E> parallelStream()` (JDK8 and later) - for "aggregate operations"
+
+
+### Traversal method 1: Aggregate Operations (JDK8 and later)
+
+In JDK 8 and later, the preferred method of iterating over a collection is to obtain a stream and perform aggregate operations on it. Aggregate operations are often used in conjunction with lambda expressions.
+
+```
+myShapesCollection.stream()
+   .filter(e -> e.getColor() == Color.RED)
+   .forEach(e -> System.out.println(e.getName()));
+```
+
+OR if running on multiple cpu cores:
+
+```
+myShapesCollection.parallelStream()
+   .filter(e -> e.getColor() == Color.RED)
+   .forEach(e -> System.out.println(e.getName()));
+```
+
+### Traversal method 2: for-each construct
+
+```
+for (Object o : collection)
+    System.out.println(o);
+```
+
+
+### Traversal method 3: Iterators
+
+Note that Iterator.remove is the only safe way to modify a collection during iteration; the behavior is unspecified if the underlying collection is modified in any other way while the iteration is in progress.
+
+Use Iterator instead of the for-each construct when you need to:
+
+* Remove the current element. The for-each construct hides the iterator, so you cannot call remove. Therefore, the for-each construct is not usable for filtering.
+* Iterate over multiple collections in parallel.
+
+Example to remove an item:
+
+```
+static void filter(Collection<?> c) {
+    for (Iterator<?> it = c.iterator(); it.hasNext(); )
+        if (!cond(it.next()))
+            it.remove();
+}
+```
 
 -------------------------------------------------------------------------------
 
@@ -305,4 +674,19 @@ System.out.format("%s %s %s%n",
 ### java.io.Closeable
 
 A Closeable is a source or destination of data that can be closed. The close method is invoked to release resources that the object is holding (such as open files).
+
+
+### java.lang.Iterable
+
+`public interface Iterable<T>`
+
+Implementing this interface allows an object to be the target of the "for-each loop" statement. 
+
+```
+public interface Iterator<E> {
+    boolean hasNext();
+    E next();
+    void remove(); //optional
+}
+```
 

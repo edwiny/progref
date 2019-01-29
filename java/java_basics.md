@@ -311,7 +311,7 @@ for(int i=1; i<11; i++){
 ```
 
 
-### enhanced for loops
+### enhanced for loops aka 'for-each construct'
 
 The for statement also has another form designed for iteration through `Collections` and `arrays`. This form is sometimes referred to as the enhanced for statement and should be used wherever possible:
 
@@ -321,6 +321,9 @@ The for statement also has another form designed for iteration through `Collecti
              System.out.println("Count is: " + item);
          }
 ```
+
+The object being iterated must implement the `Iterable` interface.
+
 
 ### break and continue
 
