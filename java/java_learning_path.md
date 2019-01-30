@@ -98,6 +98,9 @@ http://tutorials.jenkov.com/java-web-apps/index.html
 
 ## Advanced Generics 
 All the topics in this trail: https://docs.oracle.com/javase/tutorial/java/generics/inheritance.html
+In depth: http://www.angelikalanger.com/GenericsFAQ/JavaGenericsFAQ.html
+
+
 
 
 ## Concurrency

@@ -1341,6 +1341,27 @@ Box<Integer> integerBox = new Box<>();
 
 ```
 
+### Generics in method declarations
+
+```
+public static <E> Set<E> removeDups(Collection<E> c) {
+    return new LinkedHashSet<E>(c);
+}
+```
+The first <E> is the 'generic type paramater declaration'. It's only a declaration that the method will be parameterised with the E type. If there were multiple type parameters it would be declared here like 'public static <K,V> <V> fn(Map<K,V> c)'
+
+It is NOT part of the return type.
+
+
+
+### Resources
+
+Here is an in depth explanation of generics:
+http://www.angelikalanger.com/GenericsFAQ/JavaGenericsFAQ.html
+
+
+-------------------------------------------------------------------------------
+
 
 ## Exceptions
 

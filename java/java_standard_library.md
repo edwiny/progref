@@ -817,7 +817,131 @@ Set<Type> difference = new HashSet<Type>(s1);
 difference.removeAll(s2);
 ```
 
+### The List interface
 
+Lists may contain duplicate elements. In addition to the operations inherited from Collection, the List interface includes operations for the following:
+
+* `get, set, add, addAll, and remove` - positional acccess
+* `indexOf and lastIndexOf` - search for element and return index
+* `listIterator` - iterators
+* 'sublist' - range operations
+
+#### List Implementations
+
+* `ArrayList` - faster in most cases
+* `LinkedList` - better under some? circumcstances
+
+
+
+#### List operations
+
+Inherited froom Collection interface:
+
+* `remove` - always removes first occurrance of element
+* `add` and `addAll` - always appends to end of list
+
+Iterating:
+
+List returns the regular `Iterator` but also offers a special `ListIterator` which can go backwards:
+
+```
+for (ListIterator<Type> it = list.listIterator(list.size()); it.hasPrevious(); ) {
+    Type t = it.previous();
+    ...
+}
+```
+The list.size argument indicates where the iterator should start.
+
+Range-view:
+
+`subList(int fromIndex, int toIndex)` -  returns a List view of the portion of this list whose indices range from fromIndex, inclusive, to toIndex, exclusive.
+Changes to elements in the view go through to the base list and vice versa.
+
+You can use the sublist in any place you use the List.
+
+
+The semantics of the List returned by subList become undefined if elements are added to or removed from the backing List in any way other than via the returned List. Thus, it's highly recommended that you use the List returned by subList only as a transient object
+
+Most polymorphic algorithms in the Collections class apply specifically to List. Having all these algorithms at your disposal makes it very easy to manipulate lists. Here's a summary of these algorithms, which are described in more detail in the Algorithms section.
+
+
+* `sort` — sorts a List using a merge sort algorithm, which provides a fast, stable sort. (A stable sort is one that does not reorder equal elements.)
+* `shuffle` — randomly permutes the elements in a List.
+* `reverse` — reverses the order of the elements in a List.
+* `rotate` — rotates all the elements in a List by a specified distance.
+* `swap` — swaps the elements at specified positions in a List.
+* `replaceAll` — replaces all occurrences of one specified value with another.
+* `fill` — overwrites every element in a List with the specified value.
+* `copy` — copies the source List into the destination List.
+* `binarySearch` — searches for an element in an ordered List using the binary search algorithm.
+* `indexOfSubList` — returns the index of the first sublist of one List that is equal to another.
+* `lastIndexOfSubList` — returns the index of the last sublist of one List that is equal to another.
+
+
+### The Queue interface
+
+
+A Queue is a collection for holding elements prior to processing. Besides basic Collection operations, queues provides:
+
+* `add()`   - adds element unless exceeds bounds then will throw exception (`IllegalStateException`)
+* `boolean offer()` - attempt to add an element but return special value if queue is bounded and full
+* `element()` - returns but does not remove element at head - if empty will throw `NoSuchElementException`
+* `peek()`   - returns but does not remove element at head - if empty will return spesh val
+* `poll()`   - returns and removes element at head - will return special value if empty
+* `remove()` - returns and removes element at head - will throw exception if empty
+
+Each Queue method exists in two forms: (1) one throws an exception if the operation fails, and (2) the other returns a special value if the operation fails (either null or false, depending on the operation).
+
+Type of operation | Throws exception | Returns special value
+----------------- | ---------------- | --------------------- 
+insert            | add(e)           | offer(e)
+remove            | remove()         | poll()
+examine           | element()        | peek()
+
+
+Queue implementations generally do not allow insertion of null elements. The LinkedList implementation, which was retrofitted to implement Queue, is an exception. For historical reasons, it permits null elements, but you should refrain from taking advantage of this, because null is used as a special return value by the poll and peek methods.
+
+#### Implementations
+
+* `LinkedList` - implements the Queue interface
+* `PriorityQueue` - An unbounded priority queue based on a priority heap
+
+### The Deque Interface
+
+ A double-ended-queue is a linear collection of elements that supports the insertion and removal of elements at both end points. 
+ It implements both the Stack and Queue interfaces.
+
+ Implementations:
+
+ * `ArrayDeque`
+ * `LinkedList`
+
+#### Deque Operations
+
+**Insert**
+
+* `addFirst` - add at head and throw exception if bounded and full
+* `offerFirst` - add at head but don't throw exception if bounded and full
+* `addLast` - add to end and throw exception if bounded and full
+* 'offerLast' - obvious
+
+**Remove**
+
+* `removeFirst` - throws exception if empty
+* `pollFirst` - returns null if empty
+* `removeLast` - throws exception if empty
+* `pollLast`  - returns null if empty
+
+**Retrieve**
+
+Get but don't remove elements.
+
+* `getFirst` - throws exception if deque is empty
+* `peekFirst`
+* `getLast` - throws excepion if deque is empty
+* `peekLast` 
+
+### The Map interface
 
 
 
