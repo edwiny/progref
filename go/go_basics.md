@@ -1109,11 +1109,12 @@ func (T) Read(b []byte) (n int, err error)
  It populates the given byte slice with data and returns the number of bytes populated and an error value. It returns an io.EOF error when the stream ends.
 
 
- ## Simple File Reading
+## Simple File Reading
 
- ### Slurping
+### Slurping
 
-ioutil.ReadFile is the simplest form:
+`ioutil.ReadFile` is the simplest form:
+
 ```
     body, err := ioutil.ReadFile(filename)
     if err != nil {

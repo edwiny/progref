@@ -599,7 +599,7 @@ SortedSet
 * SortedSet - maintains elements in order
 * SortedMap - keys are ordered
 
-### Collectinn
+### The Collection interface
 
 The `Collection` interface contains general methods:
 
@@ -611,20 +611,23 @@ The `Collection` interface contains general methods:
 * `boolean remove(Object element)` - return true if the Collection was modified as a result.
 * `Iterator<E> iterator()`
 
-Bulk operation methods:
+**Bulk operation methods**:
 
-* `containsAll(Collection<?> c)`
-* `addAll(Collection<? extends E> c)`
-* `boolean removeAll(Collection<?> c)`
-* `boolean retainAll(Collection<?> c)`
-* `void clear()`
+Bulk operations perform an operation on an entire Collection. You could implement these shorthand operations using the basic operations, though in most cases such implementations would be less efficient.
+
+
+* `containsAll(Collection<?> c)` - returns true if the target Collection contains all of the elements in the specified Collection.
+* `addAll(Collection<? extends E> c)`- adds all of the elements in the specified Collection to the target Collection.
+* `boolean removeAll(Collection<?> c)` - removes from the target Collection all of its elements that are also contained in the specified Collection.
+* `boolean retainAll(Collection<?> c)` - retains only those elements in the target Collection that are also contained in the specified Collection.
+* `void clear()` - removes all elements from the Collection.
 * `Object[] toArray()`
 * `<T> T[] toArray(T[] a)`
 * `Stream<E> stream()` (JDK8 and later) - for "aggregate operations"
 * `Stream<E> parallelStream()` (JDK8 and later) - for "aggregate operations"
 
 
-### Traversal method 1: Aggregate Operations (JDK8 and later)
+#### Traversal method 1: Aggregate Operations (JDK8 and later)
 
 In JDK 8 and later, the preferred method of iterating over a collection is to obtain a stream and perform aggregate operations on it. Aggregate operations are often used in conjunction with lambda expressions.
 
@@ -642,7 +645,7 @@ myShapesCollection.parallelStream()
    .forEach(e -> System.out.println(e.getName()));
 ```
 
-### Traversal method 2: for-each construct
+#### Traversal method 2: for-each construct
 
 ```
 for (Object o : collection)
@@ -650,7 +653,7 @@ for (Object o : collection)
 ```
 
 
-### Traversal method 3: Iterators
+#### Traversal method 3: Iterators
 
 Note that Iterator.remove is the only safe way to modify a collection during iteration; the behavior is unspecified if the underlying collection is modified in any other way while the iteration is in progress.
 
@@ -668,6 +671,155 @@ static void filter(Collection<?> c) {
             it.remove();
 }
 ```
+
+#### Collections.singleton
+
+Collections.singleton is a static factory method that returns an immutable `Set` containing only the specified element.
+
+As a simple example of the power of bulk operations, consider the following idiom to remove all instances of a specified element, e, from a Collection, c.
+
+```
+c.removeAll(Collections.singleton(e));
+```
+
+More specifically, suppose you want to remove all of the null elements from a Collection.
+
+```
+c.removeAll(Collections.singleton(null));
+```
+
+#### Collection Interface Array Functions
+
+The toArray methods are provided as a bridge between collections and older APIs that expect arrays on input. The array operations allow the contents of a Collection to be translated into an array.
+
+For example, suppose that c is a `Collection`. The following snippet dumps the contents of c into a newly allocated array of Object whose length is identical to the number of elements in c.
+
+```
+Object[] a = c.toArray();
+```
+
+Suppose that c is known to contain only strings (perhaps because c is of type Collection<String>). The following snippet dumps the contents of c into a newly allocated array of String whose length is identical to the number of elements in c.
+
+```
+String[] a = c.toArray(new String[0]);
+```
+
+### The Set interface
+
+A `Set` is a `Collection` that cannot contain duplicate elements. It models the mathematical set abstraction. 
+
+The Set interface contains only methods inherited from Collection and adds the restriction that duplicate elements are prohibited. 
+
+`Set` also adds a stronger contract on the behavior of the equals and hashCode operations, allowing `Set` instances to be compared meaningfully even if their implementation types differ. Two `Set` instances are equal if they contain the same elements.
+
+
+#### Set implementations
+
+* HashSet - uses hash table to store elements. Best performance but no guarantee about order.
+* TreeSet - uses a red-black tree, orders its elements based on their values. Worst performance.
+* LinkedHashSet - hash table with a linked list running through it, uses insertion order to order elements. Medium performance.
+
+Always refer to the collection as `Set`, not one of the implementations, because
+* you're guaranteed to use only the standard functions
+* provides flexibility to change the implementation later just by changing the constructor
+
+
+
+#### Set usage examples
+
+Suppose you want to deduplicate a list of words:
+
+
+Using JDK 8 Aggregate Operations:
+
+```
+import java.util.*;
+import java.util.stream.*;
+
+public class FindDups {
+    public static void main(String[] args) {
+        Set<String> distinctWords = Arrays.asList(args).stream()
+        .collect(Collectors.toSet()); 
+        System.out.println(distinctWords.size()+ 
+                           " distinct words: " + 
+                           distinctWords);
+    }
+}
+```
+
+Using the for-each Construct:
+
+```
+import java.util.*;
+
+public class FindDups {
+    public static void main(String[] args) {
+        Set<String> s = new HashSet<String>();
+        for (String a : args)
+               s.add(a);
+               System.out.println(s.size() + " distinct words: " + s);
+    }
+}
+```
+
+Here's a simple but useful Set idiom. Suppose you have a Collection, c, and you want to create another Collection containing the same elements but with all duplicates eliminated. 
+
+```
+Collection<Type> noDups = new HashSet<Type>(c);
+```
+
+Or, if using JDK 8 or later, you could easily collect into a Set using aggregate operations:
+
+```
+c.stream()
+.collect(Collectors.toSet()); // no duplicates
+```
+
+Here's a slightly longer example that accumulates a Collection of names into a TreeSet (sorting it alphabetically):
+
+```
+Set<String> set = people.stream()
+.map(Person::getName)
+.collect(Collectors.toCollection(TreeSet::new));
+```
+
+And the following is a minor variant of the first idiom that preserves the order of the original collection while removing duplicate elements:
+
+```
+Collection<Type> noDups = new LinkedHashSet<Type>(c);
+```
+
+The following is a generic method that encapsulates the preceding idiom, returning a Set of the same generic type as the one passed.
+
+```
+public static <E> Set<E> removeDups(Collection<E> c) {
+    return new LinkedHashSet<E>(c);
+}
+```
+
+#### Set bulk operations aka set-algebrai operations
+
+* `s1.containsAll(s2)` — returns true if s2 is a subset of s1
+* `s1.addAll(s2)` - union
+* `s1.retainAll(s2)` - intersection
+* `s1.removeAll(s2)` - transforms s1 into the (asymmetric) set difference of s1 and s2.
+
+To perform these operations without changing the collections, you need to copy them:
+
+```
+Set<Type> union = new HashSet<Type>(s1);
+union.addAll(s2);
+
+Set<Type> intersection = new HashSet<Type>(s1);
+intersection.retainAll(s2);
+
+Set<Type> difference = new HashSet<Type>(s1);
+difference.removeAll(s2);
+```
+
+
+
+
 
 -------------------------------------------------------------------------------
 
