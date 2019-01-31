@@ -53,6 +53,7 @@ http://tutorials.jenkov.com/maven/maven-tutorial.html
 
 ## Logging
 
+Simple Logging Facade for Java (SLF4J) - http://slf4j.org/
 log4j
 
 
@@ -78,6 +79,13 @@ Aggregate Operations: https://docs.oracle.com/javase/tutorial/collections/stream
 
 ## Web applications
 http://tutorials.jenkov.com/java-web-apps/index.html
+
+Restful webservices:
+https://jersey.java.net/
+
+JSON - use jackson - http://wiki.fasterxml.com/JacksonHome/
+
+Apache HTTP Client
 
 ## Spring
 - Basic Spring App demonstrating DI: https://projects.spring.io/spring-framework/
@@ -117,7 +125,11 @@ Sources:
 - https://en.wikipedia.org/wiki/Design_Patterns
 Aspect Oriented Programming - https://www.tutorialspoint.com/spring/aop_with_spring.htm
 Functional Programming
+https://stackoverflow.com/questions/1673841/examples-of-gof-design-patterns-in-javas-core-libraries/2707195#2707195
 
+
+
+https://immutables.github.io/
 
 ## Working with existing codebases
 

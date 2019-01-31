@@ -715,9 +715,9 @@ The Set interface contains only methods inherited from Collection and adds the r
 
 #### Set implementations
 
-* HashSet - uses hash table to store elements. Best performance but no guarantee about order.
-* TreeSet - uses a red-black tree, orders its elements based on their values. Worst performance.
-* LinkedHashSet - hash table with a linked list running through it, uses insertion order to order elements. Medium performance.
+* `HashSet` - uses hash table to store elements. Best performance but no guarantee about order.
+* `TreeSet` - uses a red-black tree, orders its elements based on their values. Worst performance.
+* `LinkedHashSet `- hash table with a linked list running through it, uses insertion order to order elements. Medium performance.
 
 Always refer to the collection as `Set`, not one of the implementations, because
 * you're guaranteed to use only the standard functions
@@ -942,6 +942,144 @@ Get but don't remove elements.
 * `peekLast` 
 
 ### The Map interface
+
+A Map is an object that maps keys to values. A map cannot contain duplicate keys: Each key can map to at most one value. It models the mathematical function abstraction. 
+
+#### Map implementations
+
+Same as with Set implementations:
+
+* `HashMap` - best performance but no ordering
+* `TreeMap` - worst performance but retains ordering
+* `LinkedHashMap` - keeps insertion order at medium performance
+
+#### Map operations
+
+* `V put(K key, V value)` -
+* `<E> get(Object key)`  - 
+* `default V getOrDefault(Object key, V defaultValue)` 
+* `containsKey(Object)`    -
+* `containsValue(Object)`  -
+* `size`     -
+* `isEmpty`  -
+
+Bulk operations
+* `clear`    - removes everything
+* `putAll`   - adds one map to another. useful to provide defaut mappings.
+
+
+Collection view methods (allow parts of the Map to be treated as a Collection):
+
+* `keySet` - the `Set` of keys contained in the Map.
+* `values` - The `Collection` of values contained in the `Map`. This `Collection` is not a `Set`, because multiple keys can map to the same value.
+* `entrySet` - the `Set` of key-value pairs contained in the `Map`. The `Map` interface provides a small nested interface called `Map.Entry`, the type of the elements in this `Set`.
+
+The Collection views support element removal in all its many forms — remove, removeAll, retainAll, and clear operations, as well as the Iterator.remove operation. 
+However you can't add new elements via the Collection views.
+
+You can also use the Bulk Operations of the Collection views to do map algebra:
+
+Checking if one map is contained by another:
+
+```
+if (m1.entrySet().containsAll(m2.entrySet())) {
+    ...
+}
+```
+
+or check if two maps contain mappings for the same keys:
+
+```
+if (m1.keySet().equals(m2.keySet())) {
+    ...
+}
+```
+
+or get the common keys between two maps:
+
+```
+Set<KeyType>commonKeys = new HashSet<KeyType>(m1.keySet());
+commonKeys.retainAll(m2.keySet());
+```
+
+
+
+
+#### Iterating Map entries
+
+Can only do so by using the `Collection` view methods:
+
+```
+for (KeyType key : m.keySet())
+    System.out.println(key);
+```
+
+or using a `Iterator`:
+
+
+```
+for (Iterator<Type> it = m.keySet().iterator(); it.hasNext(); )
+    if (it.next().isBogus())
+        it.remove();
+```
+
+
+iterating over the entries:
+
+```
+for (Map.Entry<KeyType, ValType> e : m.entrySet())
+    System.out.println(e.getKey() + ": " + e.getValue());
+```
+
+
+#### Map examples
+
+Print frequency of words
+```
+import java.util.*;
+
+public class Freq {
+    public static void main(String[] args) {
+        Map<String, Integer> m = new HashMap<String, Integer>();
+
+        // Initialize frequency table from command line
+        for (String a : args) {
+            Integer freq = m.get(a);
+            m.put(a, (freq == null) ? 1 : freq + 1);
+        }
+
+        System.out.println(m.size() + " distinct words:");
+        System.out.println(m);
+    }
+}
+```
+
+Making a copy of a Map using the *conversion constructor*:
+
+```
+Map<K, V> copy = new HashMap<K, V>(m);
+```
+
+Using aggregate operations:
+
+```
+// Group employees by department
+Map<Department, List<Employee>> byDept = employees.stream()
+.collect(Collectors.groupingBy(Employee::getDepartment));
+```
+
+```
+// Compute sum of salaries by department
+Map<Department, Integer> totalByDept = employees.stream()
+.collect(Collectors.groupingBy(Employee::getDepartment,
+Collectors.summingInt(Employee::getSalary)));
+```
+
+```
+ Classify Person objects by city
+Map<String, List<Person>> peopleByCity
+         = personStream.collect(Collectors.groupingBy(Person::getCity));
+```
 
 
 

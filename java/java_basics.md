@@ -1294,6 +1294,11 @@ Abstract classes can keep state whereas interfaces cannot. However classes can o
 ## Generics / Templates
 
 Parameterised types / classes. 
+
+Generics are translated at compile time into "standard java format". You cannot infer anything about generics at runtime.
+
+
+
 Declaration syntax: 
 
 ```
