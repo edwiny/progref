@@ -1458,10 +1458,10 @@ Operations like `forEach` and `peek` are designed for side effects;
 
 #### Things to watch out for in parallel stream operations
 
-Side effect functions can be executed concurrently from multiple threads, could have unintended consequences.
-Laziness - intermediate operations may not execute until the termination command
-Interference - mutating state in lambda expressions passed to collect or reduce will have unintended consequences.
-Stateful lambdas - may execute in parallel so make sure the lambda does not depend on state other than what is passed in
+* Side effect functions can be executed concurrently from multiple threads, could have unintended consequences.
+* Laziness - intermediate operations may not execute until the termination command
+* Interference - mutating state in lambda expressions passed to collect or reduce will have unintended consequences.
+* Stateful lambdas - may execute in parallel so make sure the lambda does not depend on state other than what is passed in
 
 
 -------------------------------------------------------------------------------
