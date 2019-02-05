@@ -1,6 +1,8 @@
 
 # Standard Library
 
+These notes are based off the Oracle JDK 1.8 documentation.
+
 ## Documentation sources
 
 The official Java 8 SE API ref: https://docs.oracle.com/javase/8/docs/api/index.html
@@ -1081,6 +1083,385 @@ Map<String, List<Person>> peopleByCity
          = personStream.collect(Collectors.groupingBy(Person::getCity));
 ```
 
+### Sorting objects in Collections
+
+All native types implements the `Comparable` interface and can thus be sorted:
+
+```
+Collections.sort(myList);
+```
+
+This would sort the objects into that class' 'natural order.'
+
+To sort by a different order (e.g. employee age rather than mame), create a comparison class
+that implements the `Comparator` interface. It works just like `Comparable` but takes as arguments
+two objets to be sorted in stead of one. Example:
+
+```
+import java.util.*;
+public class EmpSort {
+    static final Comparator<Employee> SENIORITY_ORDER = 
+                                        new Comparator<Employee>() {
+            public int compare(Employee e1, Employee e2) {
+                int dateCmp = e2.hireDate().compareTo(e1.hireDate());
+                if (dateCmp != 0)
+                  return dateCmp;     
+
+                return (e1.number() < e2.number() ? -1 : (e1.number() == e2.number() ? 0 : 1));
+            }
+    };
+
+    // Employee database
+    static final Collection<Employee> employees = ... ;
+
+    public static void main(String[] args) {
+        List<Employee> e = new ArrayList<Employee>(employees);
+        Collections.sort(e, SENIORITY_ORDER);
+        System.out.println(e);
+    }
+}
+```
+
+Note that, when implementing Comparators,  ensure it produces an ordering that is compatible with `equals`. In other words, tweak it so that the only elements seen as equal when using compare are those that are also seen as equal when compared using `equals`.
+
+### The SortedSet interface
+
+A SortedSet is a Set that maintains its elements in ascending order, sorted according to the elements' natural ordering or according to a `Comparator` provided at SortedSet creation time. In addition to the normal Set operations, the SortedSet interface provides operations for the following:
+
+* Range view — allows arbitrary range operations on the sorted set
+* Endpoints — returns the first or last element in the sorted set
+* Comparator access — returns the Comparator, if any, used to sort the set
+
+The interface looks like this:
+
+```
+public interface SortedSet<E> extends Set<E> {
+    // Range-view
+    SortedSet<E> subSet(E fromElement, E toElement);
+    SortedSet<E> headSet(E toElement);
+    SortedSet<E> tailSet(E fromElement);
+
+    // Endpoints
+    E first();
+    E last();
+
+    // Comparator access
+    Comparator<? super E> comparator();
+}
+```
+The base `Set` class' methods works as normal except that:
+* The `Iterator` returned by the iterator operation traverses the sorted set in order.
+* The array returned by `toArray` contains the sorted set's elements in order.
+
+
+Range-views on SortedSets are useful because they retain their validity even if the underlying sets are modified (unlike with Lists).
+
+You also use objects from the sets to indicate the endpoints, not indices.
+
+Same examples of using range-views:
+
+```
+// how many words between doorbell and pickle in a dictionary:
+int count = dictionary.subSet("doorbell", "pickle").size();
+```
+
+```
+// removes all the elements beginning with the letter f.
+
+dictionary.subSet("f", "g").clear();
+```
+
+### The SortedMap interface
+
+A `SortedMap` is a `Map` that maintains its entries in ascending order, sorted according to the keys' natural ordering, or according to a `Comparator` provided at the time of the SortedMap creation. 
+
+The interface looks like this:
+
+```
+public interface SortedMap<K, V> extends Map<K, V>{
+    Comparator<? super K> comparator();
+    SortedMap<K, V> subMap(K fromKey, K toKey);
+    SortedMap<K, V> headMap(K toKey);
+    SortedMap<K, V> tailMap(K fromKey);
+    K firstKey();
+    K lastKey();
+}
+```
+
+Like with `SortedSet`, the operations `SortedMap` inherits from `Map` behave identically on sorted maps and normal maps with two exceptions:
+
+* The `Iterator` returned by the iterator operation on any of the sorted map's Collection views traverse the collections in order.
+* The arrays returned by the Collection views' `toArray` operations contain the keys, values, or entries in order.
+
+Because this interface is a precise Map analog of SortedSet, all the idioms and code examples in The SortedSet Interface section apply to SortedMap with only trivial modifications.
+
+
+### Aggregate Operations on Collections
+
+A pipeline is a sequence of aggregate operations.
+
+A stream is a sequence of elements. Unlike a collection, it is not a data structure that stores elements. Instead, a stream carries values from a source through a pipeline. 
+
+Compare with stream approach vs for-each approach:
+
+```
+roster
+    .stream()
+    .filter(e -> e.getGender() == Person.Sex.MALE)
+    .forEach(e -> System.out.println(e.getName()));
+```
+
+Compare this example to the following that prints the male members contained in the collection roster with a for-each loop:
+
+```
+for (Person p : roster) {
+    if (p.getGender() == Person.Sex.MALE) {
+        System.out.println(p.getName());
+    }
+}
+```
+
+The pipeline contains these components:
+* **A source**: This could be a collection, an array, a generator function, or an I/O channel
+* **Zero or more intermediate operations**: An intermediate operation, such as filter, produces a new stream.
+* **A terminal operation**. A terminal operation, such as `forEach`, produces a non-stream result, such as a primitive value (like a double value), a collection, or in the case of forEach, no value at all.
+
+
+Example:
+
+```
+double average = roster
+    .stream()
+    .filter(p -> p.getGender() == Person.Sex.MALE)
+    .mapToInt(Person::getAge)
+    .average()
+    .getAsDouble();
+```
+
+The `mapToInt` operation returns a new stream of type `IntStream`. The operation applies the function specified in its parameter to each element in a particular stream. In this example, the function is `Person::getAge,` which is a *method reference* that returns the age of the member. (Alternatively, you could use the lambda expression `e -> e.getAge()`.) Consequently, the `mapToInt` operation in this example returns a stream that contains the ages of all male members in the collection roster.
+
+The average operation calculates the average value of the elements contained in a stream of type IntStream. It returns an object of type `OptionalDouble`. If the stream contains no elements, then the average operation returns an empty instance of OptionalDouble, and invoking the method getAsDouble throws a NoSuchElementException. The JDK contains many terminal operations such as average that return one value by combining the contents of a stream. 
+
+#### Differences Between Aggregate Operations and Iterators
+
+Aggregate operations such as `forEach` appears to be an iterator but:
+
+* They use internal iteration - With internal delegation, your application determines what collection it iterates, but the JDK determines how to iterate the collection. With external iteration, your application determines both what collection it iterates and how it iterates it. However, external iteration can only iterate over the elements of a collection sequentially. Internal iteration does not have this limitation. It can more easily take advantage of parallel computing
+* They process elements from a stream - Aggregate operations process elements from a stream, not directly from a collection.
+* They support behavior as parameters - You can specify lambda expressions as parameters for most aggregate operations.
+
+
+#### Aggregate Reduction
+
+JDK provides many single value producing termination functions such as `sum()`, `average()`, `min()`, and `count()`.  
+There are also 2 special reduction operations that are general purpose:
+
+Note that both these functions return a single value.
+
+**stream.reduce()**
+
+Consider examples:
+
+Traditional method:
+
+```
+Integer totalAge = roster
+    .stream()
+    .mapToInt(Person::getAge)
+    .sum();
+```
+
+using general-purpose `reduce()`:
+
+```
+Integer totalAgeReduce = roster
+   .stream()
+   .map(Person::getAge)
+   .reduce(
+       0,
+       (a, b) -> a + b);
+```
+
+The reduce operation in this example takes two arguments:
+
+* **identity**: The identity element is both the initial value of the reduction and the default result if there are no elements in the stream. 
+* **accumulator**: The accumulator function takes two parameters: a partial result of the reduction (in this example, the sum of all processed integers so far) and the next element of the stream (in this example, an integer). It returns a new partial result. 
+
+The reduce operation always returns a new value.
+
+**stream.collect()**
+
+Unlike the `reduce` method, which always creates a new value when it processes an element, the `collect` method modifies, or mutates, an existing value.
+
+The `collect` method has these args:
+
+* `supplier` - factory method that creates new instances of the result container. It's a lambda expression (or a method reference) in stead of value like with `reduce`. It will ultimately determine the return type of the collect method.
+* `accumulator` - incorporates a stream element into a result container. (e.g. if you were averaging, it would add one value to the count and sum). No return value.
+* `combiner` - combines two result objects - used for parallelism. No return value.
+
+Here is an example:
+
+```
+class Averager implements IntConsumer
+{
+    private int total = 0;
+    private int count = 0;
+        
+    public double average() {
+        return count > 0 ? ((double) total)/count : 0;
+    }
+        
+    public void accept(int i) { total += i; count++; }
+    public void combine(Averager other) {
+        total += other.total;
+        count += other.count;
+    }
+}
+// The following pipeline uses the Averager class and the collect method to calculate the average age of all male members:
+
+Averager averageCollect = roster.stream()
+    .filter(p -> p.getGender() == Person.Sex.MALE)
+    .map(Person::getAge)
+    .collect(Averager::new, Averager::accept, Averager::combine);
+                   
+System.out.println("Average age of male members: " +
+    averageCollect.average());
+```
+
+Another way to use it is to use the `Collectors` class that encapsulates the supplier, accumulator, and combiner functionality.
+The Collectors class contains many useful reduction operations, such as accumulating elements into collections and summarizing elements according to various criteria. These reduction operations return instances of the class Collector, so you can use them as a parameter for the collect operation.
+
+Example to build a list of male employee names:
+
+```
+List<String> namesOfMaleMembersCollect = roster
+    .stream()
+    .filter(p -> p.getGender() == Person.Sex.MALE)
+    .map(p -> p.getName())
+    .collect(Collectors.toList());
+```
+
+Group by gender:
+
+```
+Map<Person.Sex, List<Person>> byGender =
+    roster
+        .stream()
+        .collect(
+            Collectors.groupingBy(Person::getGender));
+```
+You can use a **multilevel reduction** to perform more complex queries. This is where you run another `collect` inside the `collect`.
+Use the `groupingBy` operation to make a multilevel reduction. It takes two parameters:
+* a classification function 
+* an instance of Collector. 
+
+The Collector parameter is called a *downstream collector*. This is a collector that the Java runtime applies to the results of another collector. Consequently, the groupingBy operation enables you to apply a collect method to the List values created by the groupingBy operator. 
+
+This example applies the collector `mapping`, which applies the mapping function `Person::getName` to each element of the stream. Consequently, the resulting stream consists of only the names of members:
+
+```
+Map<Person.Sex, List<String>> namesByGender =
+    roster
+        .stream()
+        .collect(
+            Collectors.groupingBy(
+                Person::getGender,                      
+                Collectors.mapping(
+                    Person::getName,
+                    Collectors.toList())));
+```
+
+The groupingBy method also offers a `reduction` operation:
+
+```
+Map<Person.Sex, Integer> totalAgeByGender =
+    roster
+        .stream()
+        .collect(
+            Collectors.groupingBy(
+                Person::getGender,                      
+                Collectors.reducing(
+                    0,
+                    Person::getAge,
+                    Integer::sum)));
+
+```
+The `reducing` method takes the same arguments as the `Stream.reduce` method:
+
+* `identity`: Like the Stream.reduce operation, the identity element is both the initial value of the reduction and the default result if there are no elements in the stream. In this example, the identity element is 0; this is the initial value of the sum of ages and the default value if no members exist.
+* `mapper`: The reducing operation applies this mapper function to all stream elements. In this example, the mapper retrieves the age of each member.
+* `operation`: The operation function is used to reduce the mapped values. In this example, the operation function adds Integer values.
+
+Here is a more basic example:
+
+```
+Map<Person.Sex, Double> averageAgeByGender = roster
+    .stream()
+    .collect(
+        Collectors.groupingBy(
+            Person::getGender,                      
+            Collectors.averagingInt(Person::getAge)));
+
+```
+#### Parallelism
+
+Collections are not thread-safe! However it does provide synchronisation wrappers. Aggregate operations and parallel streams enable you to implement parallelism with non-thread-safe collections provided that you do not modify the collection while you are operating on it.
+
+Streams can be either serial (default) or parallel, which can be created by one of these methods:
+
+* `Collection.parallelStream`
+* `BaseStream.parallel` 
+
+E.g.
+
+```
+double average = roster
+    .parallelStream()
+    .filter(p -> p.getGender() == Person.Sex.MALE)
+    .mapToInt(Person::getAge)
+    .average()
+    .getAsDouble();
+```
+You can also parallelise the groupBy functionality:
+
+
+```
+ConcurrentMap<Person.Sex, List<Person>> byGender =
+    roster
+        .parallelStream()
+        .collect(
+            Collectors.groupingByConcurrent(Person::getGender));
+```
+
+Note the ConcurrentMap return type.
+
+This is called a concurrent reduction. The Java runtime performs if all of these are true for a collect operation:
+
+* The stream is parallel.
+* The parameter of the collect operation, the collector, has the characteristic `Collector.Characteristics.CONCURRENT`. 
+* Either the stream is unordered, or the collector has the characteristic `Collector.Characteristics.UNORDERED`. 
+
+**Note about ordering**
+
+* The stream operations have their internal iteration mechanism and doesn't use the underlying Collection's ordering.
+* Executing in parallel may change the ordering.
+* You can force ordering with a `forEachOrdered` but you're likely to loose parallelism:
+
+```
+listOfIntegers
+    .parallelStream()
+    .forEachOrdered(e -> System.out.print(e + " "));
+```
+#### Side effects
+
+Operations like `forEach` and `peek` are designed for side effects; 
+
+#### Things to watch out for in parallel stream operations
+
+Side effect functions can be executed concurrently from multiple threads, could have unintended consequences.
+Laziness - intermediate operations may not execute until the termination command
+Interference - mutating state in lambda expressions passed to collect or reduce will have unintended consequences.
+Stateful lambdas - may execute in parallel so make sure the lambda does not depend on state other than what is passed in
 
 
 -------------------------------------------------------------------------------
@@ -1106,3 +1487,15 @@ public interface Iterator<E> {
 }
 ```
 
+### java.lang.Comparable
+
+Lists (and arrays) of objects that implement this interface can be sorted automatically by `Collections.sort` (and `Arrays.sort`). Objects that implement this interface can be used as keys in a sorted map or as elements in a sorted set, without the need to specify a `comparator`.
+
+
+Interface:
+```
+public interface Comparable<T> {
+    public int compareTo(T o);
+}
+```
+Returns a negative integer, zero, or a positive integer as this object is less than, equal to, or greater than the specified object.

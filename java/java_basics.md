@@ -1043,6 +1043,9 @@ same as
 Arrays.sort(rosterAsArray, Person::compareByAge);
 ```
 
+Another example:
+
+`Person::getAge` is the same as lambda `e -> e.getAge()`.
 
 -------------------------------------------------------------------------------
 
