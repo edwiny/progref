@@ -1196,6 +1196,78 @@ Like with `SortedSet`, the operations `SortedMap` inherits from `Map` behave ide
 Because this interface is a precise Map analog of SortedSet, all the idioms and code examples in The SortedSet Interface section apply to SortedMap with only trivial modifications.
 
 
+### Collection implementations
+
+* `Set` - `HashSet` 
+    * Peformance: constant-time
+    * Good general purpose implemention
+    * Wrong iniital bucket size / capacity (default 16) can cause overheads.  Pick a number that's about twice the size to which you expect the set to grow
+
+* `Set` - `TreeSet`
+    * Performance: log-time
+    * Value-ordered iteration
+* `Set` - `LinkedHashSet` 
+    * Performane: nearly as fast as `HashSet`
+    * Insertion-order iteration
+* `Set` - `EnumSet`
+    * High performance for Enums
+    * Internally uses a bit vector.
+    * Supports range operations
+* `Set` - `CopyOnWriteArraySet`
+    * Mutative operations makes a new copy, so super thread safe
+    * Mutative operations require time proportional to the size
+    * Appropriate for sets often iterated but seldom changed, like event handlers with no duplication
+* `List` - `ArrayList`
+    * Performance: constant time
+    * General purpose
+    * Performance may be bad if you frequently insert items at the start, or deleting from the middle.
+* `List` - `LinkedList`
+    * Performance is better for insertion at the start or deletion from the middle (constant-time)
+    * Performance is worse for position access (linear time).
+* `List` - `CopyOnWriteArrayList`
+    * Super thread safe
+    * Use when change is infrequent, and traversal is frequent and potentially time-consuming.
+* `Map` - `HashMap`
+    * Performance: maximum speed
+    * No ordering
+* `Map` - `TreeMap`
+    * Performance: lowest
+    * Key based iteration order
+* `Map` - `LinkedHashMap`
+    * Performance: almost as good as HashMap
+    * Insertion based order
+    * Can double as cache - Can override ordering policy to order based on key access, with options to remove oldest entries (`removeEldestEntry`)
+* `Map` - `EnumMap`
+    *  If you want to map an enum to a value
+    * internally implemented as array
+* `Map` - `WeakHashMap`
+    *  allows a key-value pair to be garbage-collected when its key is no longer referenced outside of the WeakHashMap
+* `Map` - `IdentityHashMap`
+    * useful for topology-preserving object graph transformations, such as serialization or deep-copying. To perform such transformations, you need to maintain identity-based "node table" that keeps track of which objects have already been seen. 
+    * performance: good
+* `Map` - `ConcurrentHashMap`
+    * highly concurrent, high-performance. Never blocks on retrievals
+    * drop-in replacement for `Hashtable`
+* `Queue` - `LinkedList`
+    * LinkedList implements the Queue interface.
+* `Queue` - `PriorityQueue` 
+    * priority queue based on the heap data structure
+    * orders elements according to the order specified at construction time, which can be the elements' natural ordering or the ordering imposed by an explicit Comparator.
+    * poll, remove, peek, and element — access the element at the head of the queue. The head of the queue is the least element with respect to the specified ordering. If multiple elements are tied for least value, the head is one of those elements; ties are broken arbitrarily.
+* `BlockingQueue` - `LinkedBlockingQueue`
+    * optionally bounded FIFO blocking queue backed by linked nodes
+* `BlockingQueue` - `ArrayBlockingQueue`
+    * a bounded FIFO blocking queue backed by an array
+* `BlockingQueue` - `PriorityBlockingQueue`
+    * an unbounded blocking priority queue backed by a heap
+* `BlockingQueue` - `DelayQueue`
+    * a time-based scheduling queue backed by a heap
+* `BlockingQueue` - `SynchronousQueue`
+    * a simple rendezvous mechanism that uses the BlockingQueue interface
+* `TransferQueue` - `LinkedTransferQueue`
+    * a specialized BlockingQueue in which code that adds an element to the queue has the option of waiting (blocking) for code in another thread to retrieve the element.
+    
+
 ### Aggregate Operations on Collections
 
 A pipeline is a sequence of aggregate operations.
