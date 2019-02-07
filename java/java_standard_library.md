@@ -520,11 +520,12 @@ DirectoryStream<Path> stream =
      Files.newDirectoryStream(dir, "*.{java,class,jar}")
 ```
 
-### Walking directory tree
+### Walking a directory tree
 
 You need to implement a class with the `FileVisitor` interface.
 
 It contains these methods that are all optional to implement:
+
 * `preVisitDirectory` – Invoked before a directory's entries are visited.
 * `postVisitDirectory` – Invoked after all the entries in a directory are visited. If any errors are encountered, the specific exception is passed to the method.
 * `visitFile` – Invoked on the file being visited. The file's BasicFileAttributes is passed to the method, or you can use the file attributes package to read a specific set of attributes. For example, you can choose to read the file's DosFileAttributeView to determine if the file has the "hidden" bit set.
@@ -532,7 +533,7 @@ It contains these methods that are all optional to implement:
 
 Instead of implementing the FileVisitor interface, you can extend the `SimpleFileVisitor` class. This class, which implements the FileVisitor interface, visits all files in a tree and throws an IOError when an error is encountered. You can extend this class and override only the methods that you require.
 
-Then call with either of these
+Then call with either of these:
 
 * `walkFileTree(Path, FileVisitor)`
 * `walkFileTree(Path, Set<FileVisitOption>, int, FileVisitor)`
@@ -1266,7 +1267,114 @@ Because this interface is a precise Map analog of SortedSet, all the idioms and 
     * a simple rendezvous mechanism that uses the BlockingQueue interface
 * `TransferQueue` - `LinkedTransferQueue`
     * a specialized BlockingQueue in which code that adds an element to the queue has the option of waiting (blocking) for code in another thread to retrieve the element.
-    
+* `Deque` - `LinkedList`
+    * Implements the Deque interface
+    * Gppd general purpose
+* `Deque` - `ArrayDeque`
+    * Also a good general purpose implementation
+    * Resizable array implmentation
+    * More efficient than linkedlist for adding and removing at the ends, also less memory intensive.
+    * Supports 
+* `Deque` - `LinkedBlockingQueue`
+    * For concurrent acccess
+    * Will block on `takeFirst` or `takeLast` if deque is empty.
+
+### Collection Wrappers 
+
+Wrapper implementations delegate all their real work to a specified collection but add extra functionality on top of what this collection offers. For design pattern fans, this is an example of the decorator pattern.
+
+#### Synchronisation Wrappers
+
+Adds automatic synchronization (thread-safety) to an arbitrary collection. Each of the six core collection interfaces — Collection, Set, List, Map, SortedSet, and SortedMap — has one static factory method. e.g.
+
+* `public static <T> Collection<T> synchronizedCollection(Collection<T> c);`
+* `public static <T> Set<T> synchronizedSet(Set<T> s);`
+* `public static <T> List<T> synchronizedList(List<T> list);`
+* `public static <K,V> Map<K,V> synchronizedMap(Map<K,V> m);`
+* `public static <T> SortedSet<T> synchronizedSortedSet(SortedSet<T> s);`
+* `public static <K,V> SortedMap<K,V> synchronizedSortedMap(SortedMap<K,V> m);`
+
+All access needs to go through the returned collection, none through the backing collection. Best is to discard the reference to the backing collection, e.g.:
+
+```
+List<Type> list = Collections.synchronizedList(new ArrayList<Type>());
+```
+
+**NB** when iterating over the collection you must manually synchronise your iteration like this:
+
+```
+Collection<Type> c = Collections.synchronizedCollection(myCollection);
+synchronized(c) {
+    for (Type e : c)
+        foo(e);
+}
+```
+One minor downside of using wrapper implementations is that you do not have the ability to execute any noninterface operations of a wrapped implementation. 
+
+#### Unmodifiable Wrappers
+
+Makes a collection immutable, by throwing an exception (`UnsupportedOperationException`) if there are any write attempts. Also create via factory methods:
+
+* `public static <T> Collection<T> unmodifiableCollection(Collection<? extends T> c);`
+* `public static <T> Set<T> unmodifiableSet(Set<? extends T> s);`
+* `public static <T> List<T> unmodifiableList(List<? extends T> list);`
+* `public static <K,V> Map<K, V> unmodifiableMap(Map<? extends K, ? extends V> m);`
+* `public static <T> SortedSet<T> unmodifiableSortedSet(SortedSet<? extends T> s);`
+* `public static <K,V> SortedMap<K, V> unmodifiableSortedMap(SortedMap<K, ? extends V> m);`
+
+#### Checked Interface Wrappers
+
+Provides runtime type safety by throwing an exception when a unexpected type is added to the collection (that's because templates / generics are compile time only.)
+
+### Convenience Collection Implementations
+
+These mini-implementations  can be more convenient and more efficient than general-purpose implementations when you don't need their full power. All the implementations in this section are made available via static factory methods rather than public classes.
+
+#### List view of an array
+
+`Arrays.asList()`
+
+* Changes to the List write through to the array and vice versa.
+* The size of the collection is that of the array and cannot be changed.
+* If the add or the remove method is called on the List, an `UnsupportedOperationException` will result.
+
+This is normally used as a bridge between arrays and collections.
+
+It's also useful to create fixed size lists in a efficient implementation:
+
+```
+List<String> list = Arrays.asList(new String[size]);
+```
+
+#### Immutable Multiple-Copy List
+
+You can create an immutable list containing copies of the same element.
+Useful if you want to initialise a collection to some value. Examples:
+
+```
+List<Type> list = new ArrayList<Type>(Collections.nCopies(1000, (Type)null);
+```
+
+```
+lovablePets.addAll(Collections.nCopies(69, "fruit bat"));
+```
+#### Immutable Singleton Set
+
+Sometimes you'll need an immutable singleton Set, which consists of a single, specified element.
+
+One use of this implementation is to remove all occurrences of a specified element from a Collection.
+
+```
+c.removeAll(Collections.singleton(e));
+```
+
+One more use of this implementation is to provide a single input value to a method that is written to accept a collection of values.
+
+#### Empty Set, List, and Map Constants
+
+When you want to pass empty arguments to a function expecting a collection:
+
+The `Collections` class provide methods `emptySet`, `emptyList`, `emptyMap`. 
 
 ### Aggregate Operations on Collections
 
