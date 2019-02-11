@@ -1123,6 +1123,17 @@ public class EmpSort {
 }
 ```
 
+A inline example:
+
+```
+// Sort anagram groups according to size
+Collections.sort(winners, new Comparator<List<String>>() {
+    public int compare(List<String> o1, List<String> o2) {
+        return o2.size() - o1.size();
+    }});
+
+```
+
 Note that, when implementing Comparators,  ensure it produces an ordering that is compatible with `equals`. In other words, tweak it so that the only elements seen as equal when using compare are those that are also seen as equal when compared using `equals`.
 
 ### The SortedSet interface
@@ -1643,6 +1654,79 @@ Operations like `forEach` and `peek` are designed for side effects;
 * Interference - mutating state in lambda expressions passed to collect or reduce will have unintended consequences.
 * Stateful lambdas - may execute in parallel so make sure the lambda does not depend on state other than what is passed in
 
+### Common Collection Algorithms
+
+* There's a bunch of polymorphic algorithms provided by the JDK
+* Static functions in the `Collectoins` class
+* Most operate on `List`
+
+
+
+#### Sorting
+
+Uses a merge sort algorithm - runs in log(n) time.
+It's stable meaning it won't reorder equal elements.
+
+Example:
+
+```
+import java.util.*;
+
+public class Sort {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList(args);
+        Collections.sort(list);
+        System.out.println(list);
+    }
+}
+```
+Can also use `Comparators` - see Sorting objects in Collections section in these notes.
+
+#### Searching
+
+`Collections.binarySearch(list, key)` returns the index into the list where the key was found, or (-(insertion point) - 1). E.g.:
+
+```
+int pos = Collections.binarySearch(list, key);
+if (pos < 0)
+   l.add(-pos-1, key);
+```
+
+#### Other functions
+
+The `Collections` class also provides these static functions:
+
+
+* `frequency` - counts the number of times a specified items occurs in a collection
+* `disjoint` - checks if there are no common elements between two lists
+* `reverse` - reverses the order of the elements in a List
+* `fill` - overwrites every value in a list with the specified element
+* `copy` - copies one list to another. Only copies as much as the destination can hold without resizing it.
+* `swap` -  swap two elements
+* `addAll` - bulk add to another collection
+
+### Extending Collections
+
+You would need to implement a class that extends one of these abstract classes. They already provide a lot of functionality for you.
+
+* `AbstractCollection` — a Collection that is neither a Set nor a List. At a minimum, you must provide the iterator and the size methods.
+* `AbstractSet` — a Set; use is identical to AbstractCollection.
+* `AbstractList` — a List backed up by a random-access data store, such as an array. At a minimum, you must provide the positional access methods (get and, optionally, set, remove, and add) and the size method. The abstract class takes care of listIterator (and iterator).
+* `AbstractSequentialList` — a List backed up by a sequential-access data store, such as a linked list. At a minimum, you must provide the listIterator and size methods. The abstract class takes care of the positional access methods. (This is the opposite of AbstractList.)
+* `AbstractQueue` — at a minimum, you must provide the offer, peek, poll, and size methods and an iterator supporting remove.
+* `AbstractMap` — a Map. At a minimum you must provide the entrySet view. This is typically implemented with the AbstractSet class. If the Map is modifiable, you must also provide the put method.
+
+### Design tips for using Collections in APIs
+
+
+**Method arguments**
+Always use the abstract type in public facing method arguments, never the implementation types.
+
+Further, you should always use the least-specific type that makes sense. For example, don't require a List or a Set if a Collection would do. It's not that you should never require a List or a Set on input; it is correct to do so if a method depends on a property of one of these interfaces. For example, many of the algorithms provided by the Java platform require a List on input because they depend on the fact that lists are ordered. As a general rule, however, the best types to use on input are the most general: Collection and Map.
+
+**Return types**
+In one sense, return values should have the opposite behavior of input parameters: It's best to return the most specific applicable collection interface rather than the most general. The user can decide if they want to keep it specific or past a generic interface to it.
+    
 
 -------------------------------------------------------------------------------
 
