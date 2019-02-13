@@ -68,7 +68,7 @@ There is also a Character class that provides methods like `isLetter`, `isDigit`
 Not a traditional primitive type. Special logic in Java to automatically create objects of type `java.lang.String` when you
 use double quotes to enclose a string. 
 
-Strings objects are immutable.
+**Strings objects are immutable.**
 
 
 There are many overloaded constructs in the String class to create strings from various data formats.
@@ -311,7 +311,7 @@ for(int i=1; i<11; i++){
 ```
 
 
-### enhanced for loops aka 'for-each construct'
+### enhanced for loops aka 'for-each / aka foreach construct'
 
 The for statement also has another form designed for iteration through `Collections` and `arrays`. This form is sometimes referred to as the enhanced for statement and should be used wherever possible:
 
@@ -324,6 +324,7 @@ The for statement also has another form designed for iteration through `Collecti
 
 The object being iterated must implement the `Iterable` interface.
 
+**NOTE8** the value that is passed into the `item` var is a copy not a reference.
 
 ### break and continue
 
@@ -551,7 +552,9 @@ public PrintStream printf(String format, Object... args)
 ```
 
 
-### Passing arguments by value or reference
+### Passing arguments by value or by reference
+
+Java always pass by value. w
 
 Primitive arguments, such as an int or a double, are passed into methods by value. This means that any changes to the values of the parameters exist only within the scope of the method. When the method returns, the parameters are gone and any changes to them are lost
 
@@ -792,6 +795,20 @@ look just like static initializer blocks, but without the static keyword:
 
 
 The Java compiler copies initializer blocks into every constructor. Therefore, this approach can be used to share a block of code between multiple constructors.
+
+There's a hack you can use with instance member initiliazer blocks called **double brace initialisation**.
+
+```
+List<String> names = new ArrayList<String>(){{
+  add("Mr. ABC");
+  add("Mr. XYZ");
+  add("Mrs. PQR");
+  add("MNOP");
+}};
+```
+It works by creating an anonymous inner class that extendeds the ArrayList class.
+Warning it may produce extraneous class files.
+
 
 
 ### Nested classes
