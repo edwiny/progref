@@ -148,6 +148,19 @@ int[] anArray;
 anArray = new int[10];
 ```
 
+**Array Initialisation**
+
+```
+String array[] = new String[] { 
+  "Jan", "Feb", "Mar", "Apr", "May" };
+```
+
+While instantiating the array, we do not have to specify its type:
+
+```
+int array[] = { 1, 2, 3, 4, 5 };
+```
+
 **Multi-dimensional arrays**
 
  multidimensional array is an array whose components are themselves arrays. This is unlike arrays in C or Fortran. A consequence of this is that the rows are allowed to vary in length, e.g.:

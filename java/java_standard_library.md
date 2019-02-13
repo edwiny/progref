@@ -1357,6 +1357,18 @@ It's also useful to create fixed size lists in a efficient implementation:
 List<String> list = Arrays.asList(new String[size]);
 ```
 
+Can also use it as initialiser list:
+
+```
+List<Person> roster = new ArrayList<Person>(
+        Arrays.asList(
+                new Person("Mary", Person.Sex.FEMALE),
+                new Person( "Sue", Person.Sex.FEMALE),
+                new Person("Ian", Person.Sex.MALE)
+        )
+);
+```
+
 #### Immutable Multiple-Copy List
 
 You can create an immutable list containing copies of the same element.
@@ -1726,7 +1738,7 @@ Further, you should always use the least-specific type that makes sense. For exa
 
 **Return types**
 In one sense, return values should have the opposite behavior of input parameters: It's best to return the most specific applicable collection interface rather than the most general. The user can decide if they want to keep it specific or past a generic interface to it.
-    
+
 
 -------------------------------------------------------------------------------
 

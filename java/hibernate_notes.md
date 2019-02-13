@@ -1,6 +1,183 @@
 # Hibernate notes
 
 
+
+## Model
+
+### Entity Types
+
+* Rows in a table
+* Uniquely identifiable
+* Has it's own life cycle
+* Corresponds to the doman model classes
+
+### Value types
+
+Does not define its own lifecycle.
+
+* Basic types
+	* int or string, etc. Search internet for Hibernate Basic Types to see how they map to JDBC and Java types
+	* can use the `@Basic` annotation to flag a variable as basic but it's kinda redundant because it's the default. It has these attributes:
+		* `optional` - boolean - defaults to true - makes it NULLABLE
+		* `fetch` - FetchType - EAGER or LAZY
+
+
+```
+Java primitive types (boolean, int, etc)
+wrappers for the primitive types (java.lang.Boolean, java.lang.Integer, etc)
+java.lang.String
+java.math.BigInteger
+java.math.BigDecimal
+java.util.Date
+java.util.Calendar
+java.sql.Date
+java.sql.Time
+java.sql.Timestamp
+byte[] or Byte[]
+char[] or Character[]
+enums
+any other type that implements Serializable (JPA’s "support" for Serializable types is to directly serialize their state to the database).
+```
+* Embeddable types - composite sub type possibly FK?
+* Collection types - ???
+
+
+## Annotations
+
+* `@Column` - set the name of the column in the db
+* `@Table` - set the name of the table in the db
+* `@ManyToOne` - in a Entity/Table that represents the Many side of Many-to-One relationship, this indicates an attribute to be the One key.
+
+## Relationships
+
+
+### Unidirectional Many-to-One
+
+Imagine 'Order' and 'OrderItem' tables/entities. One order can have many items but one item can only belong to one order.
+
+Order:
+* the One side
+
+
+OrderItem:
+* the Many side
+* hibernate definition:
+```
+@Entity
+public class OrderItem {
+ 
+    @ManyToOne
+    private Order order;
+ 
+    …
+} 
+```
+* Hibernate would use a column with the name order_id to store the foreign key to the Order entity. To specify a different column name:
+
+```
+@Entity
+public class OrderItem {
+ 
+    @ManyToOne
+    @JoinColumn(name = “fk_order”)
+    private Order order;
+ 
+    …
+}
+
+```
+
+
+
+
+
+
+
+
+
+### OneToMany ( + ManyToOne)
+
+one row in a table is mapped to multiple rows in another table.
+
+E.g.  One cart can have many items, so here we have a one-to-many mapping.
+
+At the db level:
+
+```
+CREATE TABLE `Cart` (
+  `cart_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`cart_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+ 
+CREATE TABLE `Items` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `cart_id` int(11) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `cart_id` (`cart_id`),
+  CONSTRAINT `items_ibfk_1` FOREIGN KEY (`cart_id`) REFERENCES `Cart` (`cart_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+
+```
+
+The corresponding models:
+
+```
+@Entity
+@Table(name = "CART")
+public class Cart {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "cart_id")
+    private long id;
+
+
+    @OneToMany(mappedBy = "cart")
+    private Set<Items> items;
+
+    //getters and setters
+
+}
+
+```
+Items class:
+```
+@Entity
+@Table(name = "ITEMS")
+public class Items {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private long id;
+
+
+    @ManyToOne
+    @JoinColumn(name = "cart_id", nullable = false)
+    private Cart cart;
+
+    // Hibernate requires no-args constructor
+    public Items() {
+    }
+
+    //getters and setters
+
+}
+```
+
+#### Uni-directional vs bi-directinal
+
+If cart referenced items, but items did not reference cart back, then the relationship would be uni-directional.
+
+
+#### Owning side vs inverse side
+
+The owning side is the entity that has the reference to the other one.
+
+### ManyToMany
+
+
+
 ## Configuration
 
 
