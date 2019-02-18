@@ -46,6 +46,11 @@ public class OracleQuestions2 {
     }
 
     /*
+
+    Question 2:
+    Convert the following code into a new implementation that uses lambda expressions and
+    aggregate operations instead of nested for loops.
+
     List<Album> favs = new ArrayList<>();
         for (Album a : albums) {
             boolean hasFavorite = false;
@@ -110,7 +115,7 @@ public class OracleQuestions2 {
             .filter(a -> a.tracks.anyMatch(t -> (t.rating >= 4)))
             .sorted(Comparator.comparing(a -> a.name))
             .collect(Collectors.toList());
-         */
+        */
 
     }
 

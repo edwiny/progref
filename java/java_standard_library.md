@@ -1742,6 +1742,187 @@ In one sense, return values should have the opposite behavior of input parameter
 
 -------------------------------------------------------------------------------
 
+## Concurrency
+### Problems of concurrency
+
+#### Inteference
+
+Interference happens when two operations, running in different threads, but acting on the same data, interleave. This means that the two operations consist of multiple steps, and the sequences of steps overlap.
+
+Most common example is the ++ operator: it involves a read, increment and write sequence.
+
+#### Memory inconsistency
+
+Memory consistency errors occur when different threads have inconsistent views of what should be the same data. 
+
+The key to avoiding memory consistency errors is understanding the happens-before relationship. This relationship is simply a guarantee that memory writes by one specific statement are visible to another specific statement. 
+
+#### Liveness
+
+A concurrent application's ability to execute in a timely manner is known as its liveness. 
+Deadlocks, starvation and livelocks are types of liveness problems.
+
+Deadlock:
+ * Deadlock describes a situation where two or more threads are blocked forever, waiting for each other
+
+Starvation:
+ * Starvation describes a situation where a thread is unable to gain regular access to shared resources and is unable to make progress. This happens when shared resources are made unavailable for long periods by "greedy" threads.
+
+ Livelock:
+  * A thread often acts in response to the action of another thread. If the other thread's action is also a response to the action of another thread, then livelock may result. As with deadlock, livelocked threads are unable to make further progress. However, the threads are not blocked — they are simply too busy responding to each other to resume work. This is comparable to two people attempting to pass each other in a corridor
+
+### Basic Threads
+
+
+There are 2 ways to start a thread:
+* Implement the `Runnable` interface
+    * More flexible way, recommened
+* Subclass `Thread`
+    * Kinda old skool
+
+#### Implement Runnable
+
+`Runnable` is a functional interface.
+
+```
+public class HelloRunnable implements Runnable {
+
+    public void run() {
+        System.out.println("Hello from a thread!");
+    }
+
+    public static void main(String args[]) {
+        (new Thread(new HelloRunnable())).start();
+    }
+
+}
+```
+
+#### Subclassing Thread
+
+The Thread class itself implements Runnable, though its run method does nothing. An application can subclass Thread, providing its own implementation of run.
+```
+public class HelloThread extends Thread {
+    public void run() {
+        System.out.println("Hello from a thread!");
+    }
+
+    public static void main(String args[]) {
+        (new HelloThread()).start();
+    }
+}
+```
+
+### Thread.sleep
+
+Suspends the current thread's execution. Two forms
+* milliseconds
+* nanoseconds
+Sleep time is not precise.
+
+### Handling interrupts
+
+It's up to the thread to respond to interrupts and exit it's `run()` method.
+
+**Catching InterruptedException**
+
+Exampple:
+
+```
+// in the run() method....
+try {
+        Thread.sleep(4000);
+    } catch (InterruptedException e) {
+        // We've been interrupted: no more messages.
+        return;
+    }
+```
+
+**Checking the interrupted flag**
+
+If the thread is involved in non interruptible work, you can periodically check the interrupted flag on the thread object to see if a interrupt has been invoked:
+
+```
+if (Thread.interrupted()) {
+        // We've been interrupted: no more crunching.
+        return;
+        //also makes sense to throw new InterruptedException()
+    }
+```
+
+
+### Join
+
+The instance method 'join()' suspends running in the current thread until the thread whose join was called returns.
+
+Can be interrupted.
+
+Can also specify a timeout in milliseconds to wait for the other thread.
+
+
+### Synchronisation
+
+Threads communicate by reading and writing the same instance state. However this causes several problems:
+* interference - two or more threads mutate the same state at the same time and result in unexpectedness. Even seemingly atomic actions may result in multiple instructions in the VM that can be interefered with.
+* memory consistency -  when different threads have inconsistent views of what should be the same data
+
+It's useful to think of groups of statements to have (or not have) a **happens-before** relationship with each other. That is, one statement (or group of statements) always run before another. Some of the thread operations imply a happens-before relationship:
+
+* `Thread.start()` - any statements before this one is guaranteed to occur before the new thread starts
+* `Thread.join()` - the statements in the executing thread following the join is guaranteed to follow after the thread's execution is done.
+
+#### synchronised methods
+
+Add `synchronized` to method declaration.
+
+Synchronization is built around an internal entity known as the intrinsic lock or monitor lock. There is a monitor per Class and per object of that class (so instances methods are locked separately from the class methods.)
+
+example:
+```
+public synchronized void increment() {
+        c++;
+    }
+```
+
+* it is not possible for two invocations of synchronized methods on the same object to interleave. When one thread is executing a synchronized method for an object, all other threads that invoke synchronized methods for the same object block (suspend execution) until the first thread is done with the object.
+* Second, when a synchronized method exits, it automatically establishes a happens-before relationship with any subsequent invocation of a synchronized method for the same object. This guarantees that changes to the state of the object are visible to all threads.
+* Note that constructors cannot be synchronized — using the synchronized keyword with a constructor is a syntax error.
+* Synchronisation can cause **liveness** problems.
+
+
+#### synchronised statements
+
+Unlike synchronized methods, synchronized statements must specify the object that provides the intrinsic lock:
+
+```
+public void addName(String name) {
+    synchronized(this) {
+        lastName = name;
+        nameCount++;
+    }
+    nameList.add(name);
+}
+```
+
+Useful for improving concurrency with fine-grained synchronization.
+
+#### Reentrant Synchronisation
+
+Allowing a thread to acquire the same lock more than once enables reentrant synchronization. This describes a situation where synchronized code, directly or indirectly, invokes a method that also contains synchronized code, and both sets of code use the same lock. This is to prevent a thread from blocking itself.
+
+#### volatile variables and atomic access
+
+When a variable is declared with the `volatile` keyword it means reads and writes to that variable is atomic.
+Btw, reading and writing to variables of basic types except double and long are also atomic.
+
+* Changes to a volatile variable are always visible to other threads. 
+* What's more, it also means that when a thread reads a volatile variable, it sees not just the latest change to the volatile, but also the side effects of the code that led up the change.
+* Using simple atomic variable access is more efficient than accessing these variables through synchronized code, but requires more care by the programmer to avoid memory consistency errors.
+
+
+
+-------------------------------------------------------------------------------
+
 ## Common Interfaces
 
 ### java.io.Closeable
@@ -1775,3 +1956,9 @@ public interface Comparable<T> {
 }
 ```
 Returns a negative integer, zero, or a positive integer as this object is less than, equal to, or greater than the specified object.
+
+
+
+
+
+

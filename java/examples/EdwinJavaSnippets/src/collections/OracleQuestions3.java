@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  The program should then print random lines from the file, the number of lines printed to be
  specified by the second command line argument. Write the program so that a correctly-sized
  collection is allocated all at once, instead of being gradually expanded as the file is read in.
- 
+
  */
 
 public class OracleQuestions3 {
