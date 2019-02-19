@@ -1871,6 +1871,20 @@ It's useful to think of groups of statements to have (or not have) a **happens-b
 * `Thread.start()` - any statements before this one is guaranteed to occur before the new thread starts
 * `Thread.join()` - the statements in the executing thread following the join is guaranteed to follow after the thread's execution is done.
 
+#### Intrinsic locks / aka monitors
+
+* Every object has an intrinsic lock associated with it. 
+* By convention, a thread that needs exclusive and consistent access to an object's fields has to acquire the object's intrinsic lock before accessing them, and then release the intrinsic lock when it's done with them. 
+* A thread is said to own the intrinsic lock between the time it has acquired the lock and released the lock. 
+* As long as a thread owns an intrinsic lock, no other thread can acquire the same lock. The other thread will block when it attempts to acquire the lock.
+* When a thread releases an intrinsic lock, a **happens-before relationship** is established between that action and any subsequent acquisition of the same lock.
+
+A thread becomes the owner of the object's monitor in one of three ways:
+
+* By executing a synchronized instance method of that object.
+* By executing the body of a synchronized statement that synchronizes on the object.
+* For objects of type Class, by executing a synchronized static method of that class.
+
 #### synchronised methods
 
 Add `synchronized` to method declaration.
@@ -1885,7 +1899,7 @@ public synchronized void increment() {
 ```
 
 * it is not possible for two invocations of synchronized methods on the same object to interleave. When one thread is executing a synchronized method for an object, all other threads that invoke synchronized methods for the same object block (suspend execution) until the first thread is done with the object.
-* Second, when a synchronized method exits, it automatically establishes a happens-before relationship with any subsequent invocation of a synchronized method for the same object. This guarantees that changes to the state of the object are visible to all threads.
+* When a synchronized method exits, it automatically establishes a happens-before relationship with any subsequent invocation of a synchronized method for the same object. This guarantees that changes to the state of the object are visible to all threads.
 * Note that constructors cannot be synchronized — using the synchronized keyword with a constructor is a syntax error.
 * Synchronisation can cause **liveness** problems.
 
@@ -1918,6 +1932,136 @@ Btw, reading and writing to variables of basic types except double and long are 
 * Changes to a volatile variable are always visible to other threads. 
 * What's more, it also means that when a thread reads a volatile variable, it sees not just the latest change to the volatile, but also the side effects of the code that led up the change.
 * Using simple atomic variable access is more efficient than accessing these variables through synchronized code, but requires more care by the programmer to avoid memory consistency errors.
+
+
+#### Guarded Blocks / wait() + notifyAll() pairs
+
+* The `wait()` function releases the object's intrinsic lock and suspends the current thread
+* Must already own the intrinsic lock (easiest is via synchronised method call).
+* Another thread, after obtainin the intrinsic lock can call `notify()` (wakes up a random waiting thread) or `notifyAll()` to wake up all waiting threads.
+* The `wait()` call can be interrupted so best to always call it in a loop.
+
+
+An example of a Producer-Consumer:
+
+```
+public class Drop {
+ 
+    private String message;
+    // True if consumer should wait for producer to send message, false if producer should wait for consumer to retrieve message.
+    private boolean empty = true;
+
+    public synchronized String take() {
+        while (empty) {
+            try {
+                wait();
+            } catch (InterruptedException e) {}
+        }
+        empty = true;
+        notifyAll();
+        return message;
+    }
+
+    public synchronized void put(String message) {
+        while (!empty) {
+            try { 
+                wait();
+            } catch (InterruptedException e) {}
+        }
+        empty = false;
+        this.message = message;
+        notifyAll();
+    }
+}
+
+######
+
+import java.util.Random;
+
+public class Producer implements Runnable {
+    private Drop drop;
+
+    public Producer(Drop drop) {
+        this.drop = drop;
+    }
+
+    public void run() {
+        String importantInfo[] = {
+            "Mares eat oats",
+            "Does eat oats",
+            "Little lambs eat ivy",
+            "A kid will eat ivy too"
+        };
+        Random random = new Random();
+
+        for (int i = 0;
+             i < importantInfo.length;
+             i++) {
+            drop.put(importantInfo[i]);
+            try {
+                Thread.sleep(random.nextInt(5000));
+            } catch (InterruptedException e) {}
+        }
+        drop.put("DONE");
+    }
+}
+
+#####
+
+import java.util.Random;
+
+public class Consumer implements Runnable {
+    private Drop drop;
+
+    public Consumer(Drop drop) {
+        this.drop = drop;
+    }
+
+    public void run() {
+        Random random = new Random();
+        for (String message = drop.take();
+             ! message.equals("DONE");
+             message = drop.take()) {
+            System.out.format("MESSAGE RECEIVED: %s%n", message);
+            try {
+                Thread.sleep(random.nextInt(5000));
+            } catch (InterruptedException e) {}
+        }
+    }
+}
+
+####
+
+public class ProducerConsumerExample {
+    public static void main(String[] args) {
+        Drop drop = new Drop();
+        (new Thread(new Producer(drop))).start();
+        (new Thread(new Consumer(drop))).start();
+    }
+}
+```
+
+### Immutable Objects
+
+An object is considered immutable if its state cannot change after it is constructed. Maximum reliance on immutable objects is widely accepted as a sound strategy for creating simple, reliable code. They are particularly useful in concurrent applications. Since they cannot change state, they cannot be corrupted by thread interference or observed in an inconsistent state.
+
+Some tips for making classes immutable:
+* Don't provide "setter" methods — methods that modify fields or objects referred to by fields.
+* Make all fields final and private.
+* Don't allow subclasses to override methods. The simplest way to do this is to declare the class as final. A more sophisticated approach is to make the constructor private and construct instances in factory methods.
+* If the instance fields include references to mutable objects, don't allow those objects to be changed:
+   * Don't provide methods that modify the mutable objects.
+   * Don't share references to the mutable objects. Never store references to external, mutable objects passed to the constructor; if necessary, create copies, and store references to the copies. Similarly, create copies of your internal mutable objects when necessary to avoid returning the originals in your methods.
+
+### High level concurrency objects
+
+#### Lock Objects
+
+#### Executers
+
+#### Concurrent Collections
+
+#### Atomic Variables
 
 
 
