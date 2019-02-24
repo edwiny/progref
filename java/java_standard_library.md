@@ -2057,7 +2057,95 @@ Some tips for making classes immutable:
 
 #### Lock Objects
 
+The `java.util.concurrent.locks` package provides a `Lock` and `Condition` objects that can be used over basic synchronisation or intrinsic locks.
+Advantage:
+* you can back out of a lock attempt - the `tryLock` method backs out if the lock is not available immediately or before a timeout expires 
+
+```
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+...
+
+private final Lock lock = new ReentrantLock();
+
+try {
+        myLock = lock.tryLock();
+    } finally {
+        if (! myLock)  {
+           //lock attempt failed
+        }
+    }
+
+
+}
+lock.unlock();
+```
+
 #### Executers
+
+Executers - objects that encapsulate thread managment and creaton.
+
+3 Interfaces defined in the `java.util.concurrent` package:
+* `Executor` - for launching new tasks
+* `ExecutorService` - subinterface of Executor, which adds features that help manage the lifecycle, both of the individual tasks and of the executor itself.
+* `ScheduledExecutorService` - subinterface of ExecutorService, supports future and/or periodic execution of tasks
+
+**Executor**:
+
+Provides a single method, execute, designed to be a drop-in replacement for a common thread-creation idiom. If r is a Runnable object, and e is an Executor object you can replace:
+
+```
+# launch new thread immediately
+(new Thread(r)).start();
+```
+with
+```
+e.execute(r);
+```
+Depending on the interface implmentation this will:
+* likely to reuse an existing worker thread
+* or place r in a queue of worker threads
+
+**ExecutorService**:
+
+Add a `submit` method to Executor that:
+* takes `Runnable` as well as `Callable` objects
+* returns a `Future` which is a construct to obtain the return value of a `Callable`
+
+Furthermore the interface prescribes methods for managing the state of tasks.
+
+**ScheduledExecutorService**:
+
+Adds the `schedule` method that:
+* executes a Runnable or Callable task after a specified delay.
+
+Also adds:
+* `scheduleAtFixedRate` - execute tasks repeatedly
+* `scheduleWithFixedDelay` - execute tasks at defined intervals
+
+#### Thread pools
+
+Thrreads are actually memory intensive and their creation is resource intense.
+
+Java offers thread pool capability which are pools of generic threads that are constantly running
+and replaced with new threads should old ones die.
+
+Tasks are submitted to the pool via an internal queue, which holds extra tasks whenever there are more active tasks than threads..
+
+Thread pools allow applications to degrade gracefully because tasks that it cannot handle yet are queued up in stead of overwhelming system resources.
+
+Can be created via factory methods of the `java.util.concurrent.Executors` class:
+
+* `newFixedThreadPool` - fixed size thread pool
+* `newCachedThreadPool` -  expandable queue, suitable for many short-lived tasks
+* `newSingleThreadExecutor` - executes a single task at a time
+* Several factory methods that provide implementations of the `ScheduledExecutorService` interface
+
+These classes also provide thread pools:
+
+* `java.util.concurrent.ThreadPoolExecutor` - more generic with options to fine tune `Executers`
+* `java.util.concurrent.ScheduledThreadPoolExecutor` 
 
 #### Concurrent Collections
 
