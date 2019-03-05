@@ -2,7 +2,58 @@
 
 
 
-## Model
+## Class Mappings
+
+This is where you map your domain model to the database schema.
+
+Hibernate is java / class-centric. All data entities must be represented as classes.
+
+* Each persistable class must be mapped
+* Each class must map to one table. If your class is represented by multiple tables, you have to either refacter the class into multiple, smaller classes or create a single view that spans across the tables.
+
+Mappings consist of:
+* id
+	* Each class must have one or more fields that uniquely identify it. This can be controlled explicitly by you or by Hibernate.
+* properties
+	* you don't need to persist all properties e.g. there may be calculated fields in the class that don't need persistence
+	* hibernate should be able to figure the type out automatically via reflection but you can choose to explicitly define it.
+
+**First-class objects and collections**
+
+These as the primary actors in the model. E.g. for a Professor class that can have one or more Email addresses, the former is a first-class object.
+Any instance of a first class object is unique.
+
+The second-class entities can be represented as a collection property on the first-class object:
+
+```
+Public class Professor {
+    private Long id;
+    private String firstName;
+    private String lastName;
+    private Set emails;
+    // getters/setters elided for brevity...
+}
+```
+
+Defining the emails property as a Set in the class mapping would result in tables like this:
+
+```
+CREATE TABLE 'professors' (
+    'professor_id' int(11) NOT NULL auto_increment,
+    'first_name' varchar(25) NOT NULL,
+    'last_name' varchar(50) NOT NULL,
+    PRIMARY KEY ('professor_id')
+)
+CREATE TABLE 'emails' (
+    'professor_id' int(11) NOT NULL,
+    'email' varchar(255) NOT NULL
+)
+```
+
+
+
+
+
 
 ### Entity Types
 
@@ -42,16 +93,19 @@ any other type that implements Serializable (JPA’s "support" for Serializable 
 * Collection types - ???
 
 
-## Annotations
-
-* `@Column` - set the name of the column in the db
-* `@Table` - set the name of the table in the db
-* `@ManyToOne` - in a Entity/Table that represents the Many side of Many-to-One relationship, this indicates an attribute to be the One key.
-
-## Relationships
+### Relationships
 
 
-### Unidirectional Many-to-One
+
+
+
+
+
+
+
+
+
+#### Many-to-One (unidirectional)
 
 Imagine 'Order' and 'OrderItem' tables/entities. One order can have many items but one item can only belong to one order.
 
@@ -95,7 +149,7 @@ public class OrderItem {
 
 
 
-### OneToMany ( + ManyToOne)
+### One-To-Many ( + ManyToOne)
 
 one row in a table is mapped to multiple rows in another table.
 
@@ -279,3 +333,11 @@ public class Table1 {
 
 }
 ```
+
+
+
+## Annotations Quick Ref
+
+* `@Column` - set the name of the column in the db
+* `@Table` - set the name of the table in the db
+* `@ManyToOne` - in a Entity/Table that represents the Many side of Many-to-One relationship, this indicates an attribute to be the One key.

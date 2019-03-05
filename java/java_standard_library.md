@@ -2147,10 +2147,253 @@ These classes also provide thread pools:
 * `java.util.concurrent.ThreadPoolExecutor` - more generic with options to fine tune `Executers`
 * `java.util.concurrent.ScheduledThreadPoolExecutor` 
 
+#### Fork/Join
+
+Designed for work that can be broken into smaller pieces recursively. The goal is to use all the available processing power.
+Implementation of the `ExecutorService` interface, so it creates a thread pool. However it uses a work-stealing algorithm. Worker threads that run out of things to do can steal tasks from other threads that are still busy.
+
+Use the `ForkJoinPool` class to create the pool and exectute `ForkJoinTask` processes.
+
+The tasks should follow this pattern and be wrapped in sublcasses of either `RecursiveTask` (which can return a result) or `RecursiveAction`:
+
+```
+if (my portion of the work is small enough)
+  do the work directly
+else
+  split my work into two pieces
+  invoke the two pieces and wait for the results
+```
+
+Then create the object that represents all the work to be done and pass it to the `invoke()` method of a `ForkJoinPool` instance.
+
+
+Example: blurring an image by going through an array of pixels and producing a new array of pixels averaged by it's neighbours:
+
+```
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
+import javax.imageio.ImageIO;
+ 
+
+public class ForkBlur extends RecursiveAction {
+ 
+    private int[] mSource;
+    private int mStart;
+    private int mLength;
+    private int[] mDestination;
+    private int mBlurWidth = 15; // Processing window size, should be odd.
+ 
+    public ForkBlur(int[] src, int start, int length, int[] dst) {
+        mSource = src;
+        mStart = start;
+        mLength = length;
+        mDestination = dst;
+    }
+ 
+    // Average pixels from source, write results into destination.
+    protected void computeDirectly() {
+        int sidePixels = (mBlurWidth - 1) / 2;
+        for (int index = mStart; index < mStart + mLength; index++) {
+            // Calculate average.
+            ...
+            mDestination[index] = dpixel;
+        }
+    }
+    protected static int sThreshold = 10000;
+ 
+    @Override
+    protected void compute() {
+        if (mLength < sThreshold) {
+            computeDirectly();
+            return;
+        }
+ 
+        int split = mLength / 2;
+ 
+        invokeAll(new ForkBlur(mSource, mStart, split, mDestination),
+                new ForkBlur(mSource, mStart + split, mLength - split, 
+                mDestination));
+    }
+ 
+    // Plumbing follows.
+    public static void main(String[] args) throws Exception {
+        BufferedImage image = ImageIO.read(srcFile);
+                  
+        BufferedImage blurredImage = blur(image);
+        ImageIO.write(blurredImage, "jpg", dstFile);
+         
+         
+    }
+ 
+    public static BufferedImage blur(BufferedImage srcImage) {
+        int[] src = srcImage.getRGB(0, 0, w, h, null, 0, w);
+        int[] dst = new int[src.length];
+ 
+        int processors = Runtime.getRuntime().availableProcessors();
+ 
+        ForkBlur fb = new ForkBlur(src, 0, src.length, dst);
+        ForkJoinPool pool = new ForkJoinPool();
+        pool.invoke(fb);
+ 
+        BufferedImage dstImage =
+                new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        dstImage.setRGB(0, 0, w, h, dst, 0, w);
+ 
+        return dstImage;
+    }
+}
+```
+
+ForkJoins are also used in:
+* Arrays.parallelSort()
+* Streams 
+
 #### Concurrent Collections
+
+`java.util.concurrent` provides these thread safe collection interfaces:
+
+* `BlockingQueue` -  blocks or times out when you attempt to add to a full queue, or retrieve from an empty queue.
+* `ConcurrentMap` - defines atomic functions to remove or replace a key-value pair only if the key is present, or add a key-value pair only if the key is absent.
+* `ConcurrentNavigableMap` - sub interface of `ConcurrentMap`, upports approximate matches
 
 #### Atomic Variables
 
+The ` ava.util.concurrent.atomic` defines classes that support atomic operations on single variables. They all have `get` and `set` methods. E.g
+
+* `AtomicBoolean`
+* `AtomicInteger`
+* `AtomicIntegerArray`
+* `AtomicReference<V>`
+
+Classes in this package extend the notion of `volatile` values, fields, and array elements to those that also provide an atomic conditional update operation of the form:
+```
+  boolean compareAndSet(expectedValue, updateValue);
+```
+
+This method (which varies in argument types across different classes) atomically sets a variable to the updateValue if it currently holds the expectedValue, reporting true on success. 
+
+
+Exampple:
+
+```
+import java.util.concurrent.atomic.AtomicInteger;
+
+class AtomicCounter {
+    private AtomicInteger c = new AtomicInteger(0);
+
+    public void increment() {
+        c.incrementAndGet();
+    }
+
+    public void decrement() {
+        c.decrementAndGet();
+    }
+
+    public int value() {
+        return c.get();
+    }
+
+}
+```
+-------------------------------------------------------------------------------
+## Configuration
+
+### Properties and System Properties
+
+The `java.util.Properties` class provides a way to read and write application config.
+
+Typically, you provide a default set of properties that will be used to "fall back" to
+if a property cannot be find in the main properties file (can be specified in the 
+Constructor.)
+
+
+
+
+`Properties` extends `java.util.Hashtable`. It has these methods:
+
+* `load(Reader) / store(Writer, String)` - read/write from/to streams
+* `String  getProperty(String key, String defaultValue)` - gets property, forcing use of Strings
+* `setProperty(String key, String value)` - sets property, forcing use of Strings
+* `Set<String>  stringPropertyNames()` - returns the list of property keys including that of the default list.
+* methods inherited from `java.util.Hashtable`: `get()`, `forEach()`, `keys()`, `put()`
+
+
+
+Care should be taken to always use only the `String` versions of methods and args.
+
+Example of loading in properties files:
+
+
+```
+. . .
+// create and load default properties
+Properties defaultProps = new Properties();
+FileInputStream in = new FileInputStream("defaultProperties");
+defaultProps.load(in);
+in.close();
+
+//saving props
+
+FileOutputStream out = new FileOutputStream("appProperties");
+applicationProps.store(out, "---No Comment---");
+out.close();
+
+
+```
+
+The java runtime environment maintains a couple of **system properties**, e.g.:
+
+* `"file.separator"`
+* `"java.class.path"`
+* `"os.name"`
+* `"user.home"`
+
+Values can be read in one of 2 two ways:
+
+* `System.getProperty("some.property", "default value");`
+* `getProperties` method, which returns a `Properties` object.
+
+
+### Environment variables
+
+`System.getenv()` returns a `Map` of env vars:
+
+
+```
+import java.util.Map;
+
+public class EnvMap {
+    public static void main (String[] args) {
+        Map<String, String> env = System.getenv();
+        for (String envName : env.keySet()) {
+            System.out.format("%s=%s%n",
+                              envName,
+                              env.get(envName));
+        }
+    }
+}
+
+```
+
+## System operations
+
+### Security Manager
+
+If no security manager this will return null:
+
+```SecurityManager appsm = System.getSecurityManager();```
+
+Applications can check their acccess via `checkxxx()` methods.
+
+Functions that don't declare they throw it can generate security exceptions.
+
+### Misc System functions
+
+* `System.currentTimeMillis`
+* `System.nanoTime` - these two returns timing info - dependent on OS
+* `System.exit` - exit program
 
 
 -------------------------------------------------------------------------------
