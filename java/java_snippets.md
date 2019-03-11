@@ -11,6 +11,16 @@ import org.apache.commons.cli.*;
 CommandLineParser parser = new DefaultParser();
 
 Options options = new Options();
+
+/*
+     * @param opt Short single-character name of the option.
+     * @param longOpt Long multi-character name of the option.
+     * @param hasArg flag signally if an argument is required after this option
+     * @param description Self-documenting description
+     * @return the resulting Options instance
+
+ */
+
 options.addOption( "s", "service", true, "service location" );
 
 try {
@@ -31,5 +41,5 @@ pom.xml:
     <groupId>commons-cli</groupId>
     <artifactId>commons-cli</artifactId>
     <version>1.4</version>
-  </dependency>
+ </dependency>
 ```

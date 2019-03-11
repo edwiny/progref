@@ -67,7 +67,7 @@ try {
 }
 ```
 
-### Character Streams
+### Character Streams (Reader / Writer)
 
 Character stream I/O automatically translates the internal representation of characters to and from the local character set.
 A program that uses character streams in place of byte streams automatically adapts to the local character set and is ready for internationalization.
@@ -2376,6 +2376,13 @@ public class EnvMap {
 }
 
 ```
+
+### Command line arguments
+
+* `args[0]` contains the first argument, not the name of the program.
+* Use `args.length` to determine number of args
+
+
 
 ## System operations
 
