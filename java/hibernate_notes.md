@@ -4,6 +4,15 @@
 
 ## Class Mappings
 
+Example domain model from Java Enterprise in a Nutshell, 3rd Edition:
+
+* Department - Will contain multiple classes and professors but no students
+* UniversityClass Will have a single professor and multiple students, will belong to a single department, and will have a single syllabus
+* Syllabus - Will belong to a UniversityClass; every Syllabus will be unique to a specific UniversityClass
+* Professor - Will teach one or more classes but have a single primary department
+* Students - Will attend multiple classes but have no formal association with either a Professor or a Department
+
+
 This is where you map your domain model to the database schema.
 
 Hibernate is java / class-centric. All data entities must be represented as classes.
@@ -50,7 +59,179 @@ CREATE TABLE 'emails' (
 )
 ```
 
+Professors might have 0, 1, or many email addresses in the corresponding table.
 
+
+
+
+**One-to-One relationships**
+
+The UniversityClass and Syllabus entities have a one-to-one relationship:
+
+```
+public class UniversityClass {
+    private Long id;
+    private String name;
+    private Syllabus syllabus;
+    //getters/setters elided for clarity...
+}
+
+public class Syllabus {
+    private Long id;
+    private String abstract;
+    private String fulltext;
+    private UniversityClass uclass;
+    //getters/setters elided for clarity...
+}
+```
+
+Here UniversityClass can be considered the primary class or parent. Syllabus is the dependent object or child. These entities reference each other so it's a bi-directinoal releationship.
+
+The mappings are slightly different between these. For the parent:
+```
+...
+<many-to-one name="syllabus" column="syllabus_id"
+      unique="true"/>
+...
+```
+Says 'many-to-many' because the physical representation on this side looks the same as one-to-one. Note the `unique` attribute.
+
+For the child:
+
+```
+...
+<one-to-one name="uClass" property-ref="syllabus"/>
+...
+
+```
+Says the entity is in a one-to-one relationship and that `uClass` is establishes one end of the relationship and that the other end is of type `uClass` and that it will contain a fields called `syllabus` that refers to this class.
+
+
+**Bidirectional one-to-many**
+
+This is the most common type of relationship.
+
+One object is the parent and has multiple children. The children are bound to their parent and only to their parent.
+
+Using the university example, a Professor can teach many classes but one class can only be taught by a single professor.
+
+The class definitions:
+
+```
+public class UniversityClass {
+    private Long id;
+    private String name;
+    private Syllabus syllabus;
+    private Professor professor;
+}
+```
+The mapping:
+
+```
+<many-to-one name="professor" column="professor_id" not-null="true"/>
+```
+
+And:
+```
+public class Professor {
+    private Long id;
+    private String firstName;
+    private String lastName;
+    private Set emails;
+    private Set classes;
+}
+```
+
+The xml mapping:
+
+```
+<set name="classes">
+    <key column="professor_id"/>
+    <one-to-many class="UniversityClass"/>
+</set>
+```
+
+The resulting tables:
+
+```
+CREATE TABLE 'professors' (
+    'professor_id' int(11) NOT NULL auto_increment,
+    'first_name' varchar(25) NOT NULL,
+    'last_name' varchar(50) NOT NULL,
+    PRIMARY KEY ('professor_id')
+)
+CREATE TABLE 'university_classes' (
+    'university_class_id' int(11) NOT NULL auto-increment,
+    'name' varchar(255) NOT NULL,
+    'syllabus_id' int(11),
+    'professor_id' int(11) NOT NULL,
+    PRIMARY KEY ('university_class_id')
+)
+```
+
+**Many-to-many**
+
+Requires a join table with foreign keys into the two tables being joined.
+
+Can do the class definitions in one of two ways:
+* Class for join table with one-to-many relationships for both of the classes being joined (suggested by Hibernate group)
+* or encode the many-to-many relationship directly into the two objects being joined (preferred by most people.) We'll use this for the example below.
+
+Each end of the domain relationship now has to have a property that is a collection of the other end of the relationship:
+
+```
+public class UniversityClass {
+    private Long id;
+    private String name;
+    private Syllabus syllabus;
+    private Professor professor;
+    private Set students;
+}
+
+<set name="students" table="students_classes" inverse="true">
+    <key column="university_class_id"/>
+    <many-to-many column="student_id" class="Student"/>
+</set>
+
+```
+student is marked as inverse - This makes the Student the “parent” in the relationship, and Hibernate will not try to insert or modify the properties of the relationship if the changes are made only from the UniversityClass side.
+
+```
+public class Student {
+    private Long id;
+    private String firstName;
+    private String lastName;
+    private Set classes;
+}
+
+<set name="classes" table="students_classes">
+    <key column="student_id"/>
+    <many-to-many column="university_class_id" class="UniversityClass"/>
+</set>
+
+```
+
+The SQL definitions:
+
+```
+CREATE TABLE 'university_classes' (
+    'university_class_id' int(11) NOT NULL auto-increment,
+    'name' varchar(255) NOT NULL,
+    'syllabus_id' int(11),
+    'professor_id' int(11) NOT NULL,
+    PRIMARY KEY ('university_class_id')
+)
+CREATE TABLE 'students' (
+    'student_id' int(11) NOT NULL auto-increment,
+    'firstName' varchar(25) NOT NULL,
+    'lastName' varchar(50) NOT NULL,
+    PRIMARY KEY ('student_id')
+)
+CREATE TABLE 'students_classes' (
+    'student_id' int(11) NOT NULL,
+    'university_class_id' int(11) NOT NULL
+)
+```
 
 
 
@@ -95,140 +276,21 @@ any other type that implements Serializable (JPA’s "support" for Serializable 
 
 ### Relationships
 
-
-
-
-
-
-
-
-
-
-
 #### Many-to-One (unidirectional)
 
-Imagine 'Order' and 'OrderItem' tables/entities. One order can have many items but one item can only belong to one order.
+#### One-To-Many ( + ManyToOne)
 
-Order:
-* the One side
-
-
-OrderItem:
-* the Many side
-* hibernate definition:
-```
-@Entity
-public class OrderItem {
- 
-    @ManyToOne
-    private Order order;
- 
-    …
-} 
-```
-* Hibernate would use a column with the name order_id to store the foreign key to the Order entity. To specify a different column name:
-
-```
-@Entity
-public class OrderItem {
- 
-    @ManyToOne
-    @JoinColumn(name = “fk_order”)
-    private Order order;
- 
-    …
-}
-
-```
-
-
-
-
-
-
-
-
-
-### One-To-Many ( + ManyToOne)
-
-one row in a table is mapped to multiple rows in another table.
-
-E.g.  One cart can have many items, so here we have a one-to-many mapping.
-
-At the db level:
-
-```
-CREATE TABLE `Cart` (
-  `cart_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`cart_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
- 
-CREATE TABLE `Items` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `cart_id` int(11) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `cart_id` (`cart_id`),
-  CONSTRAINT `items_ibfk_1` FOREIGN KEY (`cart_id`) REFERENCES `Cart` (`cart_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
-
-```
-
-The corresponding models:
-
-```
-@Entity
-@Table(name = "CART")
-public class Cart {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cart_id")
-    private long id;
-
-
-    @OneToMany(mappedBy = "cart")
-    private Set<Items> items;
-
-    //getters and setters
-
-}
-
-```
-Items class:
-```
-@Entity
-@Table(name = "ITEMS")
-public class Items {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private long id;
-
-
-    @ManyToOne
-    @JoinColumn(name = "cart_id", nullable = false)
-    private Cart cart;
-
-    // Hibernate requires no-args constructor
-    public Items() {
-    }
-
-    //getters and setters
-
-}
-```
 
 #### Uni-directional vs bi-directinal
 
-If cart referenced items, but items did not reference cart back, then the relationship would be uni-directional.
-
+If each endpoint of the relationship has a public property referencing the other entity, then it's bi-directional.
 
 #### Owning side vs inverse side
 
 The owning side is the entity that has the reference to the other one.
 
-### ManyToMany
+
+
 
 
 
@@ -296,7 +358,18 @@ Postgres example:
 
 **NB:** you must manually close the session factory at end of program or your program will keep on running.
 
-## defining the model
+## Using Annotations to define the models
+
+Each entity class must:
+* be annoted by `@Entity`
+* The class must have a public or protected, no-argument constructor. The class may have other constructors.
+* Persistent instance variables must be declared private, protected, or package-private and can be accessed directly only by the entity class’s methods.
+
+Entities may extend both entity and non-entity classes, and non-entity classes may extend entity classes.
+
+All fields in the class will be persisted unless annotated by `@javax.persistence.Transient`.
+
+
 
 
 ```

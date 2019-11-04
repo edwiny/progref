@@ -21,6 +21,11 @@ System.out.print("Enter a name: ");
 String answer = sc.next();
 
 ```
+### sprintf
+
+```
+String result = String.format("%4d", i * j);
+```
 
 
 -------------------------------------------------------------------------------

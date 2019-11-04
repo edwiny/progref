@@ -1,4 +1,4 @@
-# Maven
+  # Maven
 
 
 ## Oveview
@@ -424,8 +424,7 @@ Generate a testing report:
 Then run:
 
 ```
-$ mvn package
-$ jar tf target/dateutils-jar-with-dependencies.jar 
+mvn package
 ```
 
 ### create javadocs
