@@ -51,4 +51,125 @@ Depedencies can be passed via:
 
 Dependencies == Bean
 
+## Spring Configuration
+
+### Configuration Classes
+
+Create a class annotated with `@Configuration` and add methods that return
+instances of the class you want to beanify. Annote each of these methods with `@Bean`.
+
+When to use:
+* when you don't want to create a dependency on Spring in your domain classes. All the Spring-specific config goes into the Spring Configration classes.
+* when you want more control over bean startup logic.
+
+
+### Component Scanning
+
+Spring Boot can scan for beans to wire if the class is annotated by the `@Component` annotation.
+
+The scanning is configured in the main class (entry point):
+
+```
+package com.bla.ls
+
+import org.springframework.boot.SpringApplication;
+
+@SpringBootApplication()
+public class LsApp {
+	public static void main(final String... args) {
+		SpringApplication.run(LsApp.class, args);
+	}
+}
+```
+
+Note: this will scan the `com.bla.ls` package and any sub packages under that namespace e.g. `com.bla.ls.persistence`.
+
+If you want to scan only certain classes, try:
+
+```
+@SpringBootApplication(scanBasePackages = "com.bla.ls.persistence")
+```
+
+When to use:
+* This is somewhat easier method than the Configuration classes.
+* Adds dependency on Spring to your domain classes, though.
+
+#### Stereotype annotations
+
+`@Component is a base annotation, there are others flavours that do slightly more specific things:
+
+* `@Component` - the basic type
+* `@Repository` - "Encapsulation of storage, retrieval and search which emulates a collection of objects"
+* `@Service` - "Interface to operation that stands alone in the model, with no encapsulated state."
+
+
+## Bean Lifecycle
+
+
+* Phase 1: Initialisation
+* Phase 2: General use
+* Phase 3: Termination
+
+### Initialization
+
+
+First method is to add the `@PostConstruct` annotation to a method in the bean class:
+
+
+```
+public class BeanA {
+	@PostConstruct
+        public void initialise() {
+	}
+}
+```
+
+Second method is to use the InitMethod parameter to the @Bean constructor.
+Note this is configured in the Configuration class. The Bean (domain) class
+doesn't know anything about Spring.
+
+```
+   @Bean(initMethod = "initialise")
+    public BeanB beanB() {
+        return new BeanB();
+       
+    }
+```
+
+### Destroy Phase
+
+Starts when ApplicationContext becomes eligible for garbage collection.
+
+
+Very similar to startup phase, we have two methods to hook into the event:
+* `@PreDestroy` annotation on a method in the bean class.
+* `destroyMethod="<name_of_destroy_method>"` parameter to the `@Bean` annotation in the Configuration class.
+
+
+## Setting up dependencies between beans aka wiring
+
+### Depdency Injection via Constuctor
+
+Simply pass beans via constructors. 
+
+In this example, the projectRepository bean is passed to the ProjectService bean via constructor.
+
+
+```
+@Service
+public class ProjectServiceImpl implements IProjectService {
+
+    private IProjectRepository projectRepository;
+
+    public ProjectServiceImpl(IProjectRepository projectRepository) {
+        this.projectRepository = projectRepository;
+    }
+    
+    // ...
+}
+
+```
+
+### Setter based DI
+
 
