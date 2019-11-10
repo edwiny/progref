@@ -148,7 +148,13 @@ Very similar to startup phase, we have two methods to hook into the event:
 
 ## Setting up dependencies between beans aka wiring
 
-### Depdency Injection via Constuctor
+So Spring will create beans from the classes you've indicated (or contributed to the application context) 
+but how do they call each other?
+
+Spring will instnatiate one copy of each bean and inject it into the specified classes via
+one of 3 ways:
+
+### Constructor based DI
 
 Simply pass beans via constructors. 
 
@@ -171,5 +177,138 @@ public class ProjectServiceImpl implements IProjectService {
 ```
 
 ### Setter based DI
+
+Use the `@Autowired` annotation to indicate a setter method to inject via:
+
+```
+public class ProjectServiceImpl implements IProjectService {
+  @Autowired
+  public void setProjectRepository(IProjectRepository projectRepository) {
+      this.projectRepository = projectRepository;
+  }
+```
+
+
+### Field based DI
+
+
+Use `@Autowire` annotation on the field declaration in the class you're trying to inject into:
+
+```
+public class ProjectServiceImpl implements IProjectService {
+
+    @Autowired
+    private IProjectRepository projectRepository;
+
+```
+
+### Resolving beans if multiple classes implement the interface
+
+Injection is always done via interfaces, so if multiple classes implement the same interface, how
+would Spring resolve the correct one to inject as depedency?
+
+*Method 1*
+
+Use the `@Qualifier` annotation to arguments where the interface is passed to indicate the implementatin class:
+
+```
+
+  public void setProjectRepository(@Qualifier("ProjectRepositoryImpl2") IProjectRepository projectRepository) {
+```
+
+*Method 2*
+
+Use the `@Primary` annotation to indicate a primary class.
+
+
+## Project Configuration
+
+Spring uses a property file to:
+* store simple key value pairs
+* externalise configuration
+* Inject config at runtime not compile time.
+
+Spring by convention uses the file `src/java/main/resources/application.properties` for configuration.
+
+Format of the file is typically:
+
+```
+project.prefix = BLAH
+project.suffix = 123
+```
+
+To inject the values, simply annotate class variables with the `@Value` annotation:
+
+```
+@Value("${project.prefix}")
+private String prefix;
+
+@Value("${project.suffix}")
+private Integer suffix;
+
+```
+
+## Logging
+
+Common log levels:
+* TRACE
+* DEBUG
+* INFO
+* WARN
+* ERROR
+
+### Dependencies
+
+For dependencies, include `spring-starter-logging` in the pom (generally already included in `spring-web-starter`).
+
+
+### Configuration
+
+
+NOTE that your IDE might confuse the filename patterns used to package up resources into the target jar.
+To explicitly remove any excludes in the Maven pom.xml, add the following to the `<build>` section:
+
+```
+<resources>
+    <resource>
+        <directory>YOUR_PROJECT_HOME/src/main/resources</directory>
+        <excludes>
+        </excludes>
+    </resource>
+<resources>
+  
+```  
+
+
+By default the loglevel is set to `INFO`. To configure customer level levels, add config in the `application.properties`.
+
+Default for all packages:
+
+```
+logging.level.root = DEBUG
+```
+
+Pattern of packages:
+
+### Using it in code
+
+
+```
+//there are several implementations, but Simple Logging Facade for Java will do
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+...
+
+// define as member inside class
+Logger LOG = LoggerFactory.getLogger(ProjectServiceImpl.class);
+
+
+```
+
+To use:
+
+```
+LOG.debug("Project Service >> Finding projet by id {}", id);
 
 
