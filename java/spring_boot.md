@@ -7,6 +7,7 @@
 * Not all or nothing, plays nice with other frameworks or core libraries.
 
 Major components:
+
 * Spring Core
   * Dependency Injection, Events, Validation, data binding, AOP
   * Support for Testing
