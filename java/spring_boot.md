@@ -251,6 +251,7 @@ private Integer suffix;
 ## Logging
 
 Common log levels:
+
 * TRACE
 * DEBUG
 * INFO
