@@ -310,5 +310,6 @@ To use:
 
 ```
 LOG.debug("Project Service >> Finding projet by id {}", id);
+```
 
 
