@@ -224,6 +224,7 @@ Use the `@Primary` annotation to indicate a primary class.
 
 ## Project Configuration
 
+### Using properties
 Spring uses a property file to:
 * store simple key value pairs
 * externalise configuration
@@ -248,6 +249,41 @@ private String prefix;
 private Integer suffix;
 
 ```
+
+### Using profiles to activate beans selectively
+
+Beans can be restricted to a specific profile.
+Add the `@Profile` annotion to any class you want to configure this way, e.g.
+
+```
+@Repository
+@Profile("dev")
+public class ProjectRepositoryImpl implements IProjectRepository {
+```
+
+This class will only be instantiated when the "dev" profile is active.
+
+*Inspecting the profile*
+
+Typically the profile gets logged to the console right at the start:
+
+```
+2019-11-13 07:57:09.516  INFO 84180 --- [           main] com.baeldung.ls.LsApp                    : No active profile set, falling back to default profiles: default
+```
+
+
+
+*Activating profiles*:
+
+In the `application.properties` file:
+
+```
+spring.profiles.active=dev
+```
+
+Multiple profiles can be activated by providing a comma-separated list.
+#
+
 
 ## Logging
 
@@ -277,7 +313,7 @@ To explicitly remove any excludes in the Maven pom.xml, add the following to the
         <excludes>
         </excludes>
     </resource>
-<resources>
+</resources>
   
 ```  
 
@@ -290,7 +326,20 @@ Default for all packages:
 logging.level.root = DEBUG
 ```
 
-Pattern of packages:
+*Pattern of packages*
+
+We can configure different logging levels for packages, using the property: logging.level.packagename.
+
+E.g. to keep the spring framework logging level at INFO:
+
+```
+logging.level.org.springframework=INFO
+```
+
+However there many be many other packges that emit logging too so most likely you want to keep the default at INFO and only mark your own packages as DEBUG level.
+
+
+
 
 ### Using it in code
 
@@ -313,5 +362,166 @@ To use:
 ```
 LOG.debug("Project Service >> Finding projet by id {}", id);
 ```
+
+### Logging to a file and other config options
+
+In the `application.properties`:
+
+```
+logging.file=app.log
+
+logging.pattern.dateformat=yyyy-MM-dd
+```
+
+Pro tip: use the IDE autocomplete feature to explore other logging options.
+
+## Running Spring Boot apps
+
+From the IDE:
+
+- On intellij and eclipse, right click on the main application class, then run that class. A run configuration will be automatically created that can subsequently be used.
+
+- from cmdline:
+
+```
+java -jar target/myapplication-0.0.1-SNAPSHOT.jar
+```
+
+or
+
+```
+export MAVEN_OPTS=-Xmx1024m
+mvn spring-boot:run
+```
+
+
+## Spring Testing
+
+
+Spring support for testing is focused on *integration testing* (as opposed to unit testing).
+
+
+### Dependency
+
+Add these depedencies to the pojrect:
+*  `spring-boot-starter-test`
+*  `org.junit.jupiter` (Junit 5)
+
+They also need to have the `test` scope:
+
+```
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+</dependency>
+
+<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-api</artifactId>
+    <version>5.5.2</version>
+    <scope>test</scope>
+</dependency>
+
+<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-engine</artifactId>
+    <version>5.5.2</version>
+    <scope>test</scope>
+</dependency>
+
+```
+
+The following build plugins also need to be configured to enable test discovery:
+
+```
+<plugin>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-maven-plugin</artifactId>
+</plugin>
+
+
+```
+### Folder structure
+
+Need to create folders under `src/test/java`:
+
+Create a test with the same package name as the application you're testing.
+
+In IDE you may need to set this directory as a Test Sources Root.
+
+
+### Spring Test Config class
+
+For integration tests you want to test the beans you've created. You will need to autowire them into your test class. However, for autowiring to work, you first need to create a Configuration class within your tests:
+
+*TestConfig.java*:
+
+```
+package com.example.ls.spring;
+
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+
+@Configuration
+@ComponentScan("com.example.ls")
+public class TestConfig {
+}
+```
+
+### Test Classes
+
+No convention on naming but good idea to name class something ending with IntegrationTest.
+
+
+
+
+```
+package com.example.ls.service;
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import com.example.ls.spring.TestConfig;
+import org.junit.jupiter.api.Test;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat
+
+@SpringJUnitConfig(classes = TestConfig.class)
+public class ContextIntegrationTest {
+
+    
+
+    // define instances of the beans you want to test
+    // you need to instantiate via the interface of the bean.
+    @Autowired
+    private ApplicationContext applicationContext;
+    @Autowired
+    private IProjectService projectService;
+
+}
+```
+
+
+### Testing methods and assertions
+
+...
+    // inside test class
+    @Test
+    public void whenContextIsLoaded_ThenNoExceptions() {
+
+    }
+
+    @Test
+    public void whenSavingProject_ThenOK() {
+        Project savedProject = projectService.save(new Project("project 1", 1L, LocalDate.now()));
+        assertThat(savedProject, is(notNullValue()));
+    }
+
+```
+
+
+
+
 
 
