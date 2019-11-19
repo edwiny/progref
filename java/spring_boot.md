@@ -52,7 +52,7 @@ Depedencies can be passed via:
 
 Dependencies == Bean
 
-## Spring Configuration
+## Spring Bean Configuration
 
 ### Configuration Classes
 
@@ -102,6 +102,31 @@ When to use:
 * `@Component` - the basic type
 * `@Repository` - "Encapsulation of storage, retrieval and search which emulates a collection of objects"
 * `@Service` - "Interface to operation that stands alone in the model, with no encapsulated state."
+
+
+### Auto Instantiona of Spring Platform Beans
+
+It's important to understand that the Spring framework provides the utility of the platform via a bunch of beans that gets instantiated from the platform code.
+
+The exact beans that get instantiated depends on the starter package.
+
+Every bean that Spring provides as a platform, is created conditionally.
+
+Boot relies on the @Conditional annotation and on a number of variations to drive auto-configuration:
+
+* @ConditionalOnClass,
+* @ConditionalOnMissingClass,
+* @ConditionalOnBean,
+* @ConditionalOnMissingBean
+
+Defining another bean of the same interface type will replace the platform bean with our own version. This "back-off" mechanism is a feature of Spring Boot.
+
+To inspect the list of beans that Spring auto configure, add logging to your `application.properties` file:
+
+```
+logging.level.org.springframework.boot.autoconfigure=DEBUG
+```
+
 
 
 ## Bean Lifecycle
@@ -222,7 +247,7 @@ Use the `@Qualifier` annotation to arguments where the interface is passed to in
 Use the `@Primary` annotation to indicate a primary class.
 
 
-## Project Configuration
+## Application Configuration
 
 ### Using properties
 Spring uses a property file to:
@@ -485,7 +510,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import com.example.ls.spring.TestConfig;
 import org.junit.jupiter.api.Test;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat
+import static org.junit.Assert.assertThat;
 
 @SpringJUnitConfig(classes = TestConfig.class)
 public class ContextIntegrationTest {
@@ -520,6 +545,165 @@ public class ContextIntegrationTest {
 
 ```
 
+Note the use of `AssertThat`. This is a generic method in the newer versions of Junit that replaces tbe variants of `AssertXXX` methods.
+
+
+
+## Actuators
+
+
+Drop-in production features such as health checks and monitoring.
+
+
+
+### Dependencies
+
+```
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+
+### Using it
+
+Just pulling in the depedency via the pom activates it.
+
+The starter provides these endpoints:
+
+* http://127.0.0.1:8080/actuator/health
+* http://127.0.0.1:8080/actuator/info
+
+To custommise it the data presented:
+
+
+Changing the `actuators` base path:
+
+
+```
+management.endpoints.web.base-path=/monitoring
+```
+
+
+
+### Extending the HealthInfo actuator
+
+First configre the health actuator to show extended info:
+
+```
+management.endpoint.health.show-details=ALWAYS
+```
+
+Now create a new bean that implements the `HealthIndicator` interface:
+
+
+```
+package com.baeldung.ls.actuate.health;
+
+@Component
+public class DBHealthIndicator implements HealthIndicator {
+
+    @Override
+    public Health health() {
+        if (isDbUp()) {
+            return Health.up()
+                .build();
+        } else {
+            return Health.down()
+                .withDetail("Error Code", 503)
+                .build();
+        }
+    }
+
+    private boolean isDbUp() {
+        return false;
+    }
+
+}
+```
+
+
+Spring will create a new node called "DB" in the /status output. It gets "DB" from the classname.
+
+
+## Persistenace and JPA
+
+* Heavy use of interfaces for basic operations
+* Automatic generation of implementations at runtime. !!!
+    * E.g using naming convention of the method it can generate methods
+
+
+
+### Dependencies
+
+```
+       <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+
+```
+
+### Using the data access auto generation capability of Spring Dats
+
+
+Spring Data provides several generic interfaces to encapsulate typical storage scenarios. 
+
+
+To make use of them, extend the interface and parameterise with your model classes. E.g.
+
+```
+import org.springframework.data.repository.CrudRepository;
+
+import com.myexample.ls.persistence.model.Project;
+
+public interface IProjectRepository extends CrudRepository<Project, Long> {
+
+}
+```
+Note there are no methods defined in the interface because the base interface already defines a bunch of data access methods.
+
+Now annotate your model class with JPA annotations (importing them from `javax.persistence`).
+
+Also make sure it has a *default constructor*.
+
+```
+@Entity
+public class Project {
+
+    @Id
+    private Long id;
+
+    private String name;
+
+    private LocalDate dateCreated;
+
+    //...
+    public Project() {
+    }
+
+    // also make sure equals method is implemented
+}
+```
+
+In this case, the interface already provides a method called `findById()` so there's no need to declare it in the child interface. The implementation is actually auto generated.
+
+You can harness the auto generation in new methods, using a simple convention in the method name:
+
+`findBy<Attribute><Operator>`. 
+
+E.g. if you declare the following method in your interface:
+
+```
+List<Project> findByDateCreatedBetween(LocalDate start, LocalDate end);
+```
+
+Spring Data will automatically generate the appropriate implemention for you.
 
 
 

@@ -581,6 +581,34 @@ Like class vars, can be used without a object instantiation.
 Cannot access instance fields.
 Cannot use 'this' keyword
 
+### Static Imports
+
+When using:
+
+```
+import static pkgname
+```
+You can import static methods and fields (declared as `public static`) without referencing the class that implements it.
+
+If two static members of the same name are imported from multiple different classes, the compiler will throw an error, as it will not be able to determine which member to use in the absence of class name qualification.
+
+So in stead of
+
+```
+import java.lang.Math;
+
+//Math.PI to use
+```
+
+You could instead do:
+
+```
+import static java.lang.Math.PI;
+
+//PI to use
+```
+
+
 
 -------------------------------------------------------------------------------
 
