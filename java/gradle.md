@@ -264,7 +264,12 @@ class GreetingPlugin implements Plugin<Project> {
 
 ## Runnning gradle
 
-Build file is build.gradle
+Build file is build.gradle.
+
+Don't use "gradle". That will call the gradle you have installed on your machine.
+
+Use ./gradlew wrapper in the project folder instead.
+It will cause it to download and run specific version configured for this particular project.
 
 ### Excluding tests
 
