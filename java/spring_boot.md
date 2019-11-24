@@ -547,7 +547,32 @@ public class ContextIntegrationTest {
 
 Note the use of `AssertThat`. This is a generic method in the newer versions of Junit that replaces tbe variants of `AssertXXX` methods.
 
+### Loading test data into a bean before tests are run
 
+Create a seperate bean for loading the data.
+Extend the `ApplicationContextAware` interface to hook into the startup process
+and set your data on the bean at that point.
+
+
+```
+
+@Component
+public class TestDataLoader implements ApplicationContextAware {
+    @Autowired
+    private IProjectRepository projectRepository;
+
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        projectRepository.save(new Project(randomAlphabetic(6), LocalDate.now()));
+        projectRepository.save(new Project(randomAlphabetic(6), LocalDate.now()));
+        projectRepository.save(new Project(randomAlphabetic(6), LocalDate.now()));
+        projectRepository.save(new Project(randomAlphabetic(6), LocalDate.now()));
+        projectRepository.save(new Project(randomAlphabetic(6), LocalDate.now()));
+        
+    }
+}
+```
 
 ## Actuators
 
@@ -626,7 +651,7 @@ public class DBHealthIndicator implements HealthIndicator {
 Spring will create a new node called "DB" in the /status output. It gets "DB" from the classname.
 
 
-## Persistenace and JPA
+## Persistence and JPA
 
 * Heavy use of interfaces for basic operations
 * Automatic generation of implementations at runtime. !!!
@@ -649,7 +674,7 @@ Spring will create a new node called "DB" in the /status output. It gets "DB" fr
 
 ```
 
-### Using the data access auto generation capability of Spring Dats
+### Using the data access auto generation capability of Spring Data
 
 
 Spring Data provides several generic interfaces to encapsulate typical storage scenarios. 
@@ -705,7 +730,159 @@ List<Project> findByDateCreatedBetween(LocalDate start, LocalDate end);
 
 Spring Data will automatically generate the appropriate implemention for you.
 
+You can also specify your own *custom SQL* in the interface:
+
+```
+@Query("select t from Task t where t.name like %?1%")
+List<Task> findByNameMatches(String name);
+}
+```
+
+### Relationships
+
+More notes tbd but example for now:
+
+```
+@Entity
+public class Task {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    private String description;
+
+    private LocalDate dateCreated;
+
+    private LocalDate dueDate;
+
+    private TaskStatus status;
+    
+    // ...
+}
+
+...
+
+@Entity
+public class Project {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    private LocalDate dateCreated;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "project_id")
+    private Set<Task> tasks;
+    
+    // ...
+}
+```
+### Pagination and Sorting
+
+Simply extend the `PagingAndSortingRepository` which itself is extended from the `CrudRepository` interface:
+
+```
+public interface IProjectRepository extends PagingAndSortingRepository<Project, Long> {
+```
 
 
 
+Example how to use it:
+
+Paging:
+
+```
+Page<Project> page = projectRepository.findAll(PageRequest.of(0, 1));
+
+assertThat(page.getContent(), hasSize(2));
+```
+
+Sorting:
+
+```
+Iterable<Project> retrievedProjects = projectRepository.findAll(PageRequest.of(0, 2, Sort.by(Order.asc("name"))));
+
+List<Project> projectList = new ArrayList<>();
+retrievedProjects.forEach(projectList::add);
+
+```
+
+
+## Using Spring diretly with Hibernate
+
+You don't need to use the Spring Data boot starter.
+
+Pom dependencies:
+
+```
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+```
+
+### Configuratiuon
+
+Out of the box, hibernate will create a default h2 test db, you can see it in the startup logs like this:
+
+```
+2019-11-25 06:06:22.603  INFO 1963 --- [           main] o.s.j.d.e.EmbeddedDatabaseFactory        : Starting embedded database: url='jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+```
+
+To specify your own config, create a Spring Configuration factory class that returns a `DataSource` bean:
+
+```
+package com.example.ls.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+
+import javax.sql.DataSource;
+
+@Configuration
+public class PersistenceConfig
+{
+    @Bean
+    public DataSource dataSource() {
+        return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2)
+                .setName("my-spring-db")
+                .build();
+    }
+}
+
+
+```
+
+To have a bit more control over how the db is defined, use the Spring `DriverManagerDataSource` class:
+
+```
+   @Bean
+    public DataSource dataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+
+        // these should be obtained via application properties
+        dataSource.setDriverClassName("org.h2.Driver");
+        dataSource.setUrl("jdbc:h2:mem:my-spring-db;DB_CLOSE_DELAY=-1");
+        dataSource.setUsername("username");
+        dataSource.setPassword("password");
+        return dataSource;
+    }
+```
 
