@@ -821,18 +821,18 @@ You don't need to use the Spring Data boot starter.
 Pom dependencies:
 
 ```
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-orm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-orm</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.hibernate</groupId>
+    <artifactId>hibernate-core</artifactId>
+</dependency>
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+</dependency>
 ```
 
 ### Configuratiuon
@@ -886,3 +886,38 @@ To have a bit more control over how the db is defined, use the Spring `DriverMan
     }
 ```
 
+### The Entity Manager
+
+The `EntityManager` is a core JPA API for persisting entities via JPA.
+
+Spring has deep integration into JPA. But injecting a bean from JPA requires a bit different logic to the usual Autowire mechanism. You have to use the annotations from `javax.pesistence`:
+
+```
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+...
+
+    @PersistenceContext
+    private EntityManager entityManager;
+```
+
+Once you have the entity manager bean injected in your class, you can use it like thus
+in your repository implementation:
+
+```
+    @Override
+    @Transactional
+    public Optional<Project> findById(Long id) {
+        Project entity = entityManager.find(Project.class, id);
+        return Optional.ofNullable(entity);
+    }
+
+    @Override
+    @Transactional
+    public Project save(Project project) {
+
+        entityManager.persist(project);
+        return(project);
+
+    }
+```
