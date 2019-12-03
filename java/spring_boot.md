@@ -476,7 +476,7 @@ Create a test with the same package name as the application you're testing.
 In IDE you may need to set this directory as a Test Sources Root.
 
 
-### Spring Test Config class
+### Config option 1: Spring Test Config class
 
 For integration tests you want to test the beans you've created. You will need to autowire them into your test class. However, for autowiring to work, you first need to create a Configuration class within your tests:
 
@@ -494,6 +494,58 @@ import org.springframework.context.annotation.Configuration;
 public class TestConfig {
 }
 ```
+
+You need to reference this class in the test classes using this annotation:
+
+```
+@SpringJUnitConfig(classes = TestConfig.class)
+```
+### Config option 2: Using @SpringBootTest
+
+Simply annotate your test classes with
+
+```
+@SpringBootTest
+```
+This method actually unlocks some Spring Boot magic that allows you to customise how the tests are run.
+Specifically, the `webEnvironment` arg controls whether Tomcat is spun up for the tests:
+* `@SpringBootTest(webEnvironment =  SpringBootTest.WebEnvironment.NONE)` -  if the tests do not require any web support
+* `@SpringBootTest(webEnvironment =  SpringBootTest.WebEnvironment.RANDOM_PORT)` - spin up tomcat on random port
+* `@SpringBootTest(webEnvironment =  SpringBootTest.WebEnvironment.DEFINED_PORT)` - spin up tomcat on port defined in application.properties (server.port)
+* `@SpringBootTest(webEnvironment =  SpringBootTest.WebEnvironment.MOCK)` - spin up tomcat on port defined in application.properties (server.port)
+
+### Config option 2: Using @WebMvcTest
+
+Useful if you don't want to spin up the whole application context, only the web layer.
+Works exactly like @SpringBooTest.
+
+Does not instantiate Service beans.
+
+Here is an example test:
+
+```
+@WebMvcTest
+public class ProjectControllerIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    public void whenProjectExists_thenGetSuccess() throws Exception {
+
+        mockMvc.perform(get("/projects/1"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.name").value("testName"));
+    }
+}
+```
+
+
+
+
+
+
+
 
 ### Test Classes
 
@@ -890,7 +942,7 @@ To have a bit more control over how the db is defined, use the Spring `DriverMan
 
 The `EntityManager` is a core JPA API for persisting entities via JPA.
 
-Spring has deep integration into JPA. But injecting a bean from JPA requires a bit different logic to the usual Autowire mechanism. You have to use the annotations from `javax.pesistence`:
+Spring has deep integration into JPA. But injecting a bean from JPA requires a bit different logic to the usual Autowire mechanism. You have to use the annotations from `javax.persistence`:
 
 ```
 import javax.persistence.EntityManager;
@@ -921,3 +973,194 @@ in your repository implementation:
 
     }
 ```
+## Web 
+
+### Dependencies
+
+```
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+```
+
+
+### Basic usage
+
+Create a controller class and annotate with `@RestController`:
+Typically you create one for each entity (TBD).
+
+
+```
+package com.exmaple.ls.web.controller;
+
+import com.baeldung.ls.persistence.model.Project;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+
+@RestController
+
+// this annotation configures the base path
+@RequestMapping(path = "/projects")
+public class ProjectController {
+
+    // binds to a HTTP GET method at the specified path
+    @GetMapping("/1")
+    public Project findOne() {
+        // this will return a JSON representation of Project
+        return(new Project("test project 1", LocalDate.now()));
+    }
+
+}
+
+```
+
+Remember to autowire or otherwise inject via constructor the service.
+
+
+### Reading input via HTTP
+
+
+In the controller class;
+Pass in a `value = "/{varname}"` argument to the `@GetMapping` anotation,
+then use the `@PathVariable` annotation on the arg to indicate the method
+argument that should receive the value:
+
+```
+
+
+    @GetMapping(value = "/{id}")
+    public Project findOne(@PathVariable Long id) {
+        return projectService.findById(id).get();
+    }
+
+}
+
+```
+
+### Handling NOT FOUND errors:
+
+By default, a 500 error will be generated if a non-existent entity is requested. To fix,
+use the `Optional.orElseThrow()` method:
+
+```
+    @GetMapping(value = "/{id}")
+    public Project findOne(@PathVariable Long id) {
+        return projectService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+```
+
+
+### Performing POSTS
+
+Lets say you want to have a POST handler at the root of the controller path (`/projects`):
+
+```
+@PostMapping
+public void create(@RequestBody Project project) {
+        projectService.save(project);
+    }
+```
+
+The `@RequestBody` annotation will place the object in the request body into the method arg.
+
+## MVC vs REST
+
+* MVC - Model View Controller 
+  * has concept of a model and view
+  * returns representation and presentation
+* REST - Representational State Transfer
+  * Only returns representation, presentation entirely up to client
+  * Becoming more popular than MVC due to advent of SPA and JS.
+
+
+  MVC example:
+
+  ```
+  @GetMapping("/viewProjectPage")
+public ModelAndView projectPage() {
+    ModelAndView modelAndView = new ModelAndView("projectPage");
+    modelAndView.addObject("message", "Baeldung");
+    return modelAndView;
+}
+```
+
+REST example:
+
+```
+@GetMapping("/project")
+public Project project() {
+    Project project = projectService.find...;
+    return project;
+}
+```
+
+### Decoupling Controllers from Entities
+
+It's generally not a good idea to expose Entities in your data model directly to the client because:
+
+* *Entities* are not *Resources* (aka Data Transfer Objects)
+* can lead to sensitive data being exposed unintentionally
+
+As such, it's good practice to maintain a 2nd model (the Data Transfer Objects) and convert between this and the model when retrieving or saving data.
+
+The DTO class is typically copied and pasted from the Entitiy class, but without any Persistence annotations.
+
+Conversion can look like this:
+
+```
+protected ProjectDto convertToDto(Project entity) {
+    ProjectDto dto = new ProjectDto(entity.getId(), entity.getName(), entity.getDateCreated());
+    dto.setTasks(entity.getTasks().stream().map(t -> convertTaskToDto(t)).collect(Collectors.toSet()));
+
+    return dto;
+}
+
+protected Project convertToEntity(ProjectDto dto) {
+    Project project = new Project(dto.getName(), dto.getDateCreated());
+    if (!StringUtils.isEmpty(dto.getId())) {
+        project.setId(dto.getId());
+    }
+    return project;
+}
+```
+The Controller methods can then be changed to look something like this:
+
+```
+@GetMapping(value = "/{id}")
+public ProjectDto findOne(@PathVariable Long id) {
+    Project entity = projectService.findById(id).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    return convertToDto(entity);
+}
+
+@PostMapping
+public void create(@RequestBody ProjectDto newProject) {
+    Project entity = convertToEntity(newProject);
+    this.projectService.save(entity);
+}
+
+```
+
+### Testing MVC
+
+#### Dependencies
+
+```
+       <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+```
+
+
+
