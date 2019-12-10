@@ -1,4 +1,4 @@
-package io;
+package com.example.io;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

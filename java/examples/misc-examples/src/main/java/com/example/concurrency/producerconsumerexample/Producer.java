@@ -1,5 +1,3 @@
-package concurrency.producerconsumerexample;
-
 /*
  * Copyright (c) 1995, 2008, Oracle and/or its affiliates. All rights reserved.
  *
@@ -30,27 +28,39 @@ package concurrency.producerconsumerexample;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package com.example.concurrency.producerconsumerexample;
+
 
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 
-public class Consumer implements Runnable {
+public class Producer implements Runnable {
     private BlockingQueue<String> drop;
 
-    public Consumer(BlockingQueue<String> drop) {
+    public Producer(BlockingQueue<String> drop) {
         this.drop = drop;
     }
 
     public void run() {
+        String importantInfo[] = {
+                "Mares eat oats",
+                "Does eat oats",
+                "Little lambs eat ivy",
+                "A kid will eat ivy too"
+        };
         Random random = new Random();
-        try {
 
-            for (String message = drop.take();
-             ! message.equals("DONE");
-             message = drop.take()) {
-            System.out.format("MESSAGE RECEIVED: %s%n", message);
+        for (int i = 0;
+             i < importantInfo.length; i++) {
+
+            try {
+                drop.put(importantInfo[i]);
                 Thread.sleep(random.nextInt(5000));
+            } catch (InterruptedException e) {}
         }
+
+        try {
+            drop.put("DONE");
         } catch (InterruptedException e) {}
     }
 }

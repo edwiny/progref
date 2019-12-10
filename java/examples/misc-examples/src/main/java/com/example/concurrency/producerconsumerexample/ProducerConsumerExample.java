@@ -1,4 +1,4 @@
-package concurrency.producerconsumerexample;
+package com.example.concurrency.producerconsumerexample;
 
 /*
  * Copyright (c) 1995, 2008, Oracle and/or its affiliates. All rights reserved.
@@ -31,46 +31,26 @@ package concurrency.producerconsumerexample;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Drop {
-    // Message sent from producer
-    // to consumer.
-    private String message;
-    // True if consumer should wait
-    // for producer to send message,
-    // false if producer should wait for
-    // consumer to retrieve message.
-    private boolean empty = true;
+/* Question:
 
-    public synchronized String take() {
-        // Wait until message is
-        // available.
-        while (empty) {
-            try {
-                wait();
-            } catch (InterruptedException e) {}
-        }
-        // Toggle status.
-        empty = true;
-        // Notify producer that
-        // status has changed.
-        notifyAll();
-        return message;
-    }
+    Modify the producer-consumer example in Guarded Blocks to use a standard library class
+    instead of the Drop class.
 
-    public synchronized void put(String message) {
-        // Wait until message has
-        // been retrieved.
-        while (!empty) {
-            try {
-                wait();
-            } catch (InterruptedException e) {}
-        }
-        // Toggle status.
-        empty = false;
-        // Store message.
-        this.message = message;
-        // Notify consumer that status
-        // has changed.
-        notifyAll();
+    This is question 2 on https://docs.oracle.com/javase/tutorial/essential/concurrency/QandE/answers.html
+
+ */
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+
+public class ProducerConsumerExample {
+    public static void main(String[] args) {
+
+        BlockingQueue<String> queue = new SynchronousQueue<String>();
+
+        (new Thread(new Producer(queue))).start();
+        (new Thread(new Consumer(queue))).start();
+
     }
 }

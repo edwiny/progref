@@ -1,4 +1,4 @@
-package collections;
+package com.example.collections;
 
 import java.io.BufferedReader;
 import java.io.IOException;

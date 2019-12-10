@@ -1,4 +1,4 @@
-package concurrency.producerconsumerexample;
+package com.example.concurrency.producerconsumerexample;
 
 /*
  * Copyright (c) 1995, 2008, Oracle and/or its affiliates. All rights reserved.
@@ -31,26 +31,26 @@ package concurrency.producerconsumerexample;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* Question:
-
-    Modify the producer-consumer example in Guarded Blocks to use a standard library class
-    instead of the Drop class.
-
-    This is question 2 on https://docs.oracle.com/javase/tutorial/essential/concurrency/QandE/answers.html
-
- */
-
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 
-public class ProducerConsumerExample {
-    public static void main(String[] args) {
+public class Consumer implements Runnable {
+    private BlockingQueue<String> drop;
 
-        BlockingQueue<String> queue = new SynchronousQueue<String>();
+    public Consumer(BlockingQueue<String> drop) {
+        this.drop = drop;
+    }
 
-        (new Thread(new Producer(queue))).start();
-        (new Thread(new Consumer(queue))).start();
+    public void run() {
+        Random random = new Random();
+        try {
 
+            for (String message = drop.take();
+             ! message.equals("DONE");
+             message = drop.take()) {
+            System.out.format("MESSAGE RECEIVED: %s%n", message);
+                Thread.sleep(random.nextInt(5000));
+        }
+        } catch (InterruptedException e) {}
     }
 }

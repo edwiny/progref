@@ -1,4 +1,4 @@
-package collections.support;
+package com.example.collections.support;
 
 public class Person {
     public static enum Sex { MALE, FEMALE };

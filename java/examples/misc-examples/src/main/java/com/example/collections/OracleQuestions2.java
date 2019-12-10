@@ -1,8 +1,8 @@
-package collections;
+package com.example.collections;
 
-import collections.support.Album;
-import collections.support.Person;
-import collections.support.Track;
+import com.example.collections.support.Album;
+import com.example.collections.support.Person;
+import com.example.collections.support.Track;
 
 import java.util.ArrayList;
 import java.util.Arrays;

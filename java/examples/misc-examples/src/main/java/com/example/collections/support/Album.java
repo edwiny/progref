@@ -1,4 +1,4 @@
-package collections.support;
+package com.example.collections.support;
 
 import java.util.List;
 
