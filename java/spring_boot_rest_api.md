@@ -83,7 +83,137 @@ public ProjectDto create(@RequestBody ProjectDto newProject) {
 }
 ```
 
+The JSON fields have to match the class attributes but this can be customised with annotations.
 
 
 
-### 
+
+
+### @ResponseBody
+
+This annotation, at the start of a method, tells Spring to return an object of the method's return type to the client.
+
+*But*... don't need to annotate the @RestController-annotated controllers with the @ResponseBody annotation since it's done by default here.
+
+
+### @RequestParam
+
+Maps the query arguments to method args, e.g.:
+
+```
+// http://localhost:8080/projects?name=Project2
+
+
+public Collection<ProjectDto> findProjects(@RequestParam("name") String name) {
+  // ...
+}
+```
+
+By default, the param will be required on all requests. To make it optional, there are 
+two ways:
+
+```
+public Collection<ProjectDto> findProjects(@RequestParam(name = "name", required = false) String name) {
+  // ...
+}
+```
+
+OR use Optionals:
+
+```
+public Collection<ProjectDto> findProjects(@RequestParam(name = “name”) Optional<String> name) {
+  // ...
+}
+
+```
+
+OR supply a default value:
+
+```
+public Collection<ProjectDto> findProjects(@RequestParam(name = "name", defaultValue = "") String name) {
+  // ...
+}
+```
+
+### @PathVariable
+
+Extract components of the path as arguments for the Controller method.
+
+Can use it in different ways:
+
+```
+@GetMapping(value = "/{id}")
+public ProjectDto findOne(@PathVariable Long id) {
+
+    Project entity = projectService.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    return convertToDto(entity);
+}
+```
+
+Can also be more explicit with:
+
+```
+@PathVariable("id") Long id
+```
+
+Using regular expressions to map path components:
+
+
+```
+
+// http://localhost:8080/projects/categoryA-12/1
+
+@GetMapping(value = "/{category}-{subcategoryId:\\d\\d}/{id}")
+public ProjectDto findOne(@PathVariable Long id,
+  @PathVariable String category,
+  @PathVariable Integer subcategoryId) {
+    // ...
+}
+```
+
+If same path variables are optional, specify with:
+
+```
+@PathVariable(required = false) Long id
+```
+
+## Exception Handling
+
+
+### Manul method - not really  recommended
+
+```
+    @GetMapping(value = "/{id}")
+    public ProjectDto findOne(@PathVariable Long id) {
+        Project entity = projectService.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return convertToDto(entity);
+    }
+
+```
+
+To display custom message:
+
+```
+new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found")
+```
+
+Scatters exception handling over the codebase.
+Spring already does a good job of exception handling.
+
+### Global Exception Handler  - recommneded
+
+Use the `@ControllerAdvice` annotation to create a global exception handler:
+
+```
+
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+}
+
+
+```

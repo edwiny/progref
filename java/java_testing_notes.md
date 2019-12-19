@@ -1,4 +1,4 @@
-# Java testing notes - Junit
+# Java testing notes - Junit 4
 
 Note that Junit 4 and 5 are quite different. These notes are mostly focusssing on Junit4.
 
@@ -90,6 +90,7 @@ Can be controlled with these class annotations:
 * `assertSame([message,] expected, actual)` - Checks that both variables refer to the same object.
 
 
+
 ## Test Suites
 
 Combine several test classes into suites. Running a test suite executes all test classes in that suite in the specified order. A test suite can also contain other test suites.
@@ -178,4 +179,14 @@ public class SlowTestSuite {
     // Will run A.b, but not A.a or B.c
 }
 
+```
+
+# Junit 5
+
+## Assertion examples
+
+Checking a collection contains certain elements:
+
+```
+assertThat(projects, hasItems(newProject, newProject2));
 ```

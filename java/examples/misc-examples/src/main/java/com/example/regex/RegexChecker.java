@@ -6,21 +6,32 @@ import java.util.regex.Matcher;
 public class RegexChecker {
 
     public static void main(String[] args) {
-        String regexStr = "atl-vertigo--shard-(jira|conf).*(jres|sc|ps1|syn|dw).*";
+        String regexPattern = "atl-vertigo--shard-(jira|conf).*(jres|sc|ps1|syn|dw).*";
+        String simplePattern = "atl-vertigo--shard";
+
 
         String input = "atl-vertigo--shard-jira-prod-us-10--sc--ps1";
 
 
-        Pattern pattern = Pattern.compile(regexStr);
+        Pattern pattern = Pattern.compile(regexPattern);
 
         Matcher matcher = pattern.matcher(input);
 
         if(matcher.matches()) {
-            System.out.println("matched!");
+            System.out.println("Regex matched!");
         }
         else {
-            System.out.println("NOT matched");
+            System.out.println("Regex NOT matched");
         }
+
+
+        if(input.startsWith(simplePattern)) {
+            System.out.println("Simple pattern matched");
+        }
+        else {
+            System.out.println("Simple pattern NOT matched");
+        }
+
 
 
 

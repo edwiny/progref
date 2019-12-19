@@ -97,7 +97,7 @@ Create the "projects" template in that folder:
 ### Handling POSTs
 
 * Create a template with a form, and bind it to a GET request.
-* In the HTML form, reference the name of a attribute containing the DTO of the model being passed to the 
+* In the HTML form, reference the name of a model attribute containing the DTO of the model being passed to the 
 view, using the `th:object` HTML attribute in the form definition (See below)
 
 E.g. template `new-project.html`:
@@ -123,6 +123,8 @@ E.g. template `new-project.html`:
 </body>
 </html>
 ```
+
+`#th:object` indicates the model attribute to which the submitted data will be bound.
 
 In the Controller, create a method to return this template for GET requests:
 
@@ -229,3 +231,55 @@ This will return the user back to the form they came from, but there won't be an
 
 This funky magic will display a 'must not be blank' message below the input field.
 
+
+
+## FreeMarker
+
+### Dependency
+
+```
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-freemarker</artifactId>
+            <version>2.1.8.RELEASE</version>
+        </dependency>
+```
+
+### Displaying data
+
+The Controller GetMapping method is exactly the same as in the Thymeleaf example above:
+
+```
+   @GetMapping
+    public String getProjects(Model model) {
+        Iterable<Project> projects =  projectService.findAll();
+        List<ProjectDto> projectDtos = new ArrayList<>();
+        projects.forEach(p -> projectDtos.add(convertToDto(p)));
+
+        model.addAttribute("projects", projectDtos);
+        return "projects";
+    }
+```
+
+The template `projects.ftl` needs to be create in `main/resources/templates` and can look like this:
+
+```
+<#list projects as project>
+
+    <h1>${project.name}</h1>
+
+    Tasks:
+    <ul>
+        <#list project.tasks as task>
+            <li>${task.name} : ${task.description}</li>
+        </#list>
+    </ul>
+</#list>
+
+```
+
+### Changing the template filename suffix 
+
+By default, FreeMarker templates have a ".ftl" extension. To change it to ".html" (to get IDE support), set the application.properties property:
+
+```spring.freemarker.suffix=.html```

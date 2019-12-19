@@ -104,7 +104,7 @@ When to use:
 * `@Service` - "Interface to operation that stands alone in the model, with no encapsulated state."
 
 
-### Auto Instantiona of Spring Platform Beans
+### Auto Instantiation of Spring Platform Beans
 
 It's important to understand that the Spring framework provides the utility of the platform via a bunch of beans that gets instantiated from the platform code.
 

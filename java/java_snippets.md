@@ -43,3 +43,11 @@ pom.xml:
     <version>1.4</version>
  </dependency>
 ```
+
+## Sorting
+
+Use aggregation functions with lambdas:
+
+```        
+sortedProjects.sort(Comparator.comparing(Project::getName));
+```
