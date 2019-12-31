@@ -179,10 +179,30 @@ If same path variables are optional, specify with:
 @PathVariable(required = false) Long id
 ```
 
+
+### @RequestParam
+
+Map query params to controller method args.
+
+Example usage:
+
+```
+public Collection<ProjectDto> findProjects(@RequestParam("name") String name) {
+  // ...
+}
+```
+
+Additional attributes that can be passed to the annotation:
+* required (boolean) - will generate a exception if no value specified  -default is true
+* defaultValue (String) - good practice to set it to "" so we don't need to null check the value
+
+
+
+
 ## Exception Handling
 
 
-### Manul method - not really  recommended
+### Manul method - not really recommended
 
 ```
     @GetMapping(value = "/{id}")
@@ -205,15 +225,27 @@ Spring already does a good job of exception handling.
 
 ### Global Exception Handler  - recommneded
 
-Use the `@ControllerAdvice` annotation to create a global exception handler:
+1. Use the `@ControllerAdvice` annotation to create a global exception handler class:
 
 ```
-
-
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
 }
 
+```
+
+2. Define methods on this class to handle specific exception classes. It has to be annotated with the class of the exception:
 
 ```
+@ExceptionHandler(EmptyResultDataAccessException.class)
+public ResponseEntity<String> handleDataRetrievalException(EmptyResultDataAccessException ex) {
+    return new ResponseEntity<String>("Exception retrieving data: " + ex.getMessage(), HttpStatus.NOT_FOUND);
+}
+```
+
+**Note**: you can hamdle "families" of exceptions this way by specifying a parent exception class in the annotation and method parameters.
+
+3. You can also extend the Spring class `ResponseEntityExceptionHandler` which already maps most of the internal Spring exception classes and offers protected methods to customise behaviour.
+
+
