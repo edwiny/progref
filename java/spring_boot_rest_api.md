@@ -249,3 +249,5 @@ public ResponseEntity<String> handleDataRetrievalException(EmptyResultDataAccess
 3. You can also extend the Spring class `ResponseEntityExceptionHandler` which already maps most of the internal Spring exception classes and offers protected methods to customise behaviour.
 
 
+## Consuming a REST api via Spring RestTemplate
+
