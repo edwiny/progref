@@ -249,5 +249,39 @@ public ResponseEntity<String> handleDataRetrievalException(EmptyResultDataAccess
 3. You can also extend the Spring class `ResponseEntityExceptionHandler` which already maps most of the internal Spring exception classes and offers protected methods to customise behaviour.
 
 
-## Consuming a REST api via Spring RestTemplate
+## Testing a REST api via Spring RestTemplate
+
+
+RestTemplate is a REST client provided with Spring Web. It makes it trivial to make a HTTP call and marshall the response into the expect class.
+Make sure the client has access to the REST DTO.
+
+
+```
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
+// your DTO
+
+import com.baeldung.ls.web.dto.ProjectDto;
+
+
+@SpringBootTest
+public class ProjectRestApiLiveTest {
+    private static String BASE_URL = "http://localhost:8080/projects/";
+    private RestTemplate restTemplate = new RestTemplate();
+
+    @Test
+    public void givenProjectExists_whenGet_thenSuccess() {
+        ResponseEntity<ProjectDto> response = restTemplate.getForEntity(BASE_URL + "1", ProjectDto.class);
+        assertThat(response.getStatusCodeValue(), Matchers.equalTo(200));
+        assertNotNull(response.getBody());
+    }
+
+
+}
+```
+
+
+
 
