@@ -283,5 +283,19 @@ public class ProjectRestApiLiveTest {
 ```
 
 
+To POST:
+
+
+```
+@Test
+public void givenNewProject_whenCreated_thenSuccess() {
+    ProjectDto newProject = new ProjectDto(1L, "First Project", LocalDate.now());
+    ResponseEntity<Void> response = restTemplate.postForEntity(BASE_URL, newProject, Void.class);
+    
+    // assertions...
+}
+
+```
+
 
 
