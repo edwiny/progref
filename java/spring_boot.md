@@ -517,7 +517,7 @@ Specifically, the `webEnvironment` arg controls whether Tomcat is spun up for th
 ### Config option 2: Using @WebMvcTest
 
 Useful if you don't want to spin up the whole application context, only the web layer.
-Works exactly like @SpringBooTest.
+Works exactly like @SpringBootTest.
 
 Does not instantiate Service beans.
 
