@@ -8,10 +8,15 @@
 
 ## Favour Composition over Inheritance
 
-Composition establishes a HAS-A relationship between classes.
+Composition establishes a HAS-A relationship between classes (where Inheritance creates a IS-A  relationship).
+
+Classes should achieve code reuse using composition rather than inheritance from a superclass.
 
 
-## Program to an interface, not an implemenmtation
+## Program to an interface, not an implementation
+
+Clients remain unaware of the specific types of objects they use, as long as 
+the objects adhere to the interface that the clients expect.
 
 ## Encapsulates what varies
 
