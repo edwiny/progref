@@ -1947,6 +1947,58 @@ Soundcard soundcard =
 (https://www.oracle.com/technical-resources/articles/java/java8-optional.html)
 
 
+ just taking too long due to the amount of data being scanned
+
+## Logging
+
+In each class where you want to do logging:
+
+```
+//imports
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+//in your class
+private static final Logger log = LoggerFactory.getLogger($NAME_OF_CLASS.class);
+ ```
+
+
+ When you want to log:
+
+ ```
+ log.info("your msg");
+ log.debug("debug message")
+ //etc
+ ```
+
+
+For dependencies, the implementation jars typically contain dependencies encoded back for slf4j.
+
+To get the log4j one:
+
+
+```
+<dependency>
+  <groupId>org.slf4j</groupId>
+  <artifactId>slf4j-log4j12</artifactId>
+  <version>1.7.28</version>
+</dependency>
+
+```
+
+### slf4j
+
+It's an abstraction and provides no actual logging capability of itself. However it provides a consistent interface and documentation for various different logging providers.
+
+### java.util.logging (aka "JUL")
+
+The standard logging implementation in Java but it's not very popular as it is seen as inflexible and slow.
+
+### log4j and logback
+
+Popular logging implementations that work with slf4j
+
+
 
 
 

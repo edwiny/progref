@@ -348,7 +348,7 @@ mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart -DgroupI
 
 
 
-### Editor "named" archetypes
+### IDE "named" archetypes
 
 You can generate project files for Eclipse or Intellij:
 
@@ -376,6 +376,51 @@ src/assembly    Assembly descriptors
 src/site    Site
 ```
 
+
+## Multi-module projects
+
+
+A multi-module project is defined by a parent POM referencing one or more submodules.
+
+To denote the parent POM:
+* packaging should be `pom`
+* there should be a `modules` section.
+
+E.g.
+
+```
+<project ... >
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>simple-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0</version>
+    <name>Parent Project</name>
+
+    <modules>
+        <module>project-core</module>
+        <module>project-webapp</module>
+    </modules>
+
+```
+
+Each module element corresponds to a subdirectory of the simple-parent directory. Maven knows to look in these directories for pom.xml files, and it will add submodules to the list of Maven projects included in a build.
+
+Both the build configuration and the dependencies are inherited by all submodules. Using POM inheritance allows you to add common dependencies for universal dependencies like JUnit or Log4J.
+
+
+In the modules, reference the parent pom like this:
+
+```
+<parent>
+        <groupId>org.example/groupId>
+        <artifactId>simple-parent</artifactId>
+        <version>1.0</version>
+</parent>
+```
+
+To declare dependencies between modules, just use the regular `<dependencies>` method.
 
 
 ## Common plugins
@@ -410,7 +455,7 @@ Generate a testing report:
               </descriptorRefs>
               <archive>
                 <manifest>
-                  <mainClass>babel.App</mainClass>
+                  <mainClass>your.package.App</mainClass>
                 </manifest>
               </archive>
             </configuration>
@@ -421,10 +466,16 @@ Generate a testing report:
 </build>
 ```
 
-Then run:
+Build with:
 
 ```
 mvn package
+```
+
+Run the program with:
+
+```
+java -cp  target/$PROJECT-1.0-SNAPSHOT-jar-with-dependencies.jar your.package.App
 ```
 
 ### create javadocs
@@ -489,4 +540,5 @@ mvn package
     <scope>test</scope>
 </dependency>
 ```
+
 

@@ -4,7 +4,14 @@
 
 ## Open-closed
 
+Classes should be open for extension but closed for modification.
+
 ## Loose Coupling
+
+Strive for loosely coupled designs between objects that interact. Objects interact with each other without knowing too much about each other.
+Drives the following design patterns:
+
+* Observer
 
 ## Favour Composition over Inheritance
 
