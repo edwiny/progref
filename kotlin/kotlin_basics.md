@@ -723,4 +723,205 @@ val l: Int = if (b != null) b.length else -1
 val l = b?.length ?: -1
 ```
 
+It's also useful to generate exceptions:
+
+```
+val name = node.getName() ?: throw IllegalArgumentException("name expected")
+```
+
+
+**Null Pointer Exception operator**
+
+
+Kotlin discourage this use but you can convert a nullable value to a non-null value by added the NPE operator in the reference, 
+which will generate a null pointer exception if the value is null:
+
+```
+val l = b!!.length
+```
+
+
+**Example**
+
+The follwing java code can be rewritten like so:
+
+```
+ublic void sendMessageToClient(
+    @Nullable Client client,
+    @Nullable String message,
+    @NotNull Mailer mailer
+) {
+    if (client == null || message == null) return;
+
+    PersonalInfo personalInfo = client.getPersonalInfo();
+    if (personalInfo == null) return;
+
+    String email = personalInfo.getEmail();
+    if (email == null) return;
+
+    mailer.sendMessage(email, message);
+}
+```
+
+as:
+
+```
+val email = client?.personalInfo?.email
+ if (email != null && message != null) {
+        mailer.sendMessage(email, message)
+ }
+```
+
+
+### Extension functions
+
+Write new functions for classes that you don't own.
+
+Notice use of `this`:
+
+```
+fun MutableList<Int>.swap(index1: Int, index2: Int) {
+    val tmp = this[index1] // 'this' corresponds to the list
+    this[index1] = this[index2]
+    this[index2] = tmp
+}
+```
+
+Now just call this fuction like any other method on the class:
+
+```
+val list = mutableListOf(1, 2, 3)
+list.swap(0, 2) // 'this' inside 'swap()' will hold the value of 'list'
+```
+
+
+
+
+
+## Control flow
+
+### if
+
+If statements are expressions in Kotlin, i.e. they return values. That is why there's no ternary operator:
+
+```
+val max = if (a > b) a else b
+```
+
+The last expression is the value of the block:
+
+```
+val max = if (a > b) {
+    print("Choose a")
+    a
+} else {
+    print("Choose b")
+    b
+}
+```
+
+If you're using if as an expression rather than a statement (for example, returning its value or assigning it to a variable), the expression is required to have an else branch.
+
+
+
+### when
+
+Replaces the `switch` statement from other languages:
+
+```
+when (x) {
+    1 -> print("x == 1")
+    2 -> print("x == 2")
+    
+    # can use commas to group common matches
+    0, 1 -> print("x == 0 or x == 1")
+    
+    in 1..10 -> print("x is in the range")
+    in validNumbers -> print("x is valid")
+    
+    else -> { // Note the block
+        print("x is neither 1 nor 2")
+    }
+}
+```
+
+Can use to replace if statements (no argument supplied):
+
+```
+when {
+    x.isOdd() -> print("x is odd")
+    y.isEven() -> print("y is even")
+    else -> print("x+y is even.")
+}
+```
+
+Can also be treated as expression, i.e. assign to a variable:
+
+```
+fun Request.getBody() =
+        when (val response = executeRequest()) {
+            is Success -> response.body
+            is HttpError -> throw HttpException(response.status)
+        }
+```
+
+
+
+## Casting
+
+### is operator
+
+Can check type of any object:
+
+```
+if (obj is String) {
+    print(obj.length)
+}
+```
+
+### Smart Casts
+
+Kotlin compiler "caches" the `is` checks and can automaticall insert a cast after a `is` check has been done:
+
+
+```
+fun demo(x: Any) {
+    if (x is String) {
+        print(x.length) // x is automatically cast to String
+    }
+}
+```
+
+Example: the following Java code:
+
+```
+public int eval(Expr expr) {
+    if (expr instanceof Num) {
+        return ((Num) expr).getValue();
+    }
+    if (expr instanceof Sum) {
+        Sum sum = (Sum) expr;
+        return eval(sum.getLeft()) + eval(sum.getRight());
+    }
+    throw new IllegalArgumentException("Unknown expression");
+}
+```
+
+can be rewritten in Kotlin as:
+
+
+```
+fun eval(expr: Expr): Int =
+        when (expr) {
+            is Num -> expr.value
+            is Sum -> eval(expr.left) + eval(expr.right)
+            else -> throw IllegalArgumentException("Unknown expression")
+        }
+
+interface Expr
+class Num(val value: Int) : Expr
+class Sum(val left: Expr, val right: Expr) : Expr
+```
+
+
 
