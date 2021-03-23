@@ -13,7 +13,14 @@ return
 foo() will never be called, though. 
 
 
+* main function:
 
+```
+fun main(args: Array<String>) {
+    println("Hello World!")
+}
+
+```
 
 
 
@@ -55,7 +62,7 @@ Any named arguments omitted will use the default values.
 
 ### Single-expression functions
 
-When returns a single expression, braces can be omitted:
+When returning a single expression, braces can be omitted:
 
 ```
 fun double(x: Int): Int = x * 2
@@ -354,7 +361,14 @@ class Person(firstName: String) { /* class body */ }
 The primary constructor cannot contain any code. 
 
 You can use `val` and `var` in the primary constructor parameter list to automatically defines class properties from
-the parameter list and assign the values passed in at create time. Compare Kotlin:
+the parameter list and assign the values passed in at create time. 
+
+When you write val/var within the constructor, it declares a property inside the class. When you do not write it, it is simply a parameter passed to the primary constructor, where you can access the parameters within the init block or use it to initialize other properties. 
+
+If all you're going to do with the argument is pass to super class, then do not use var or val.
+
+
+Compare Kotlin:
 
 ```
 class Person constructor(val name: String, val age: Int? = null)
@@ -922,6 +936,97 @@ interface Expr
 class Num(val value: Int) : Expr
 class Sum(val left: Expr, val right: Expr) : Expr
 ```
+
+
+## Object Expressions
+
+Useful for when you need to create a slight modification of an object without needing to declare a subclass.
+
+### Object Expressions
+
+This is essentially an *anonymous class*:
+
+```
+window.addMouseListener(object : MouseAdapter() {
+    override fun mouseClicked(e: MouseEvent) { /*...*/ }
+
+    override fun mouseEntered(e: MouseEvent) { /*...*/ }
+})
+```
+
+If a supertype has a constructor, appropriate constructor parameters must be passed to it, using a commma to seperate constructor calls if there are multiple super types:
+
+```
+open class A(x: Int) {
+    public open val y: Int = x
+}
+
+interface B { /*...*/ }
+
+val ab: A = object : A(1), B {
+    override val y = 15
+}
+```
+
+If the class definition is trivial, you can actually just omit the super type and constructor calls:
+
+```
+fun foo() {
+    val adHoc = object {
+        var x: Int = 0
+        var y: Int = 0
+    }
+    print(adHoc.x + adHoc.y)
+}
+```
+
+
+*NOTE*: code in the anonymous object can access the variables from the enclosing scope.
+
+
+### Object declarations
+
+
+
+## Enums
+
+
+* Each enum constant is an object.
+* 
+
+Basic usage:
+
+```
+enum class Direction {
+        NORTH, SOUTH, WEST, EAST
+}
+
+
+// or 
+enum class Color(val rgb: Int) {
+    RED(0xFF0000),
+    GREEN(0x00FF00),
+    BLUE(0x0000FF)
+}
+```
+
+Every enum constant has properties to obtain it's name and position:
+
+```
+val name: String
+val ordinal: Int
+```
+
+
+Enum classes in Kotlin have synthetic methods allowing to list the defined enum constants and to get an enum constant by its name:
+(EnumClass represents the particular enum you're working with)
+
+```
+EnumClass.valueOf(value: String): EnumClass
+EnumClass.values(): Array<EnumClass>
+```
+Throws `IllegalArgumentException` if value doesn't exist.
+
 
 
 

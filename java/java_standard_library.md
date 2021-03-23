@@ -1947,7 +1947,6 @@ Soundcard soundcard =
 (https://www.oracle.com/technical-resources/articles/java/java8-optional.html)
 
 
- just taking too long due to the amount of data being scanned
 
 ## Logging
 
