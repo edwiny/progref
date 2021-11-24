@@ -628,7 +628,7 @@ if (foo::bar.isInitialized) {
 ```
 
 
-### Data classes
+### Data Classes
 
 Classes whose only purpose is to hold data, not code.
 
@@ -1028,5 +1028,26 @@ EnumClass.values(): Array<EnumClass>
 Throws `IllegalArgumentException` if value doesn't exist.
 
 
+## Static properties
 
+In class definition:
+
+```
+companion object {
+  private val log = LoggerFactory.getLogger(CollectionRunnerService::class.java)
+  val DELAY_WHEN_MAX_REQUESTED: Duration = Duration.ofHours(1)
+}
+```
+
+
+## Static methods
+
+In class definition:
+
+```
+companion object {
+        fun getConfigForEnvironment(environment : String): Configuration { ... }
+}
+
+```
 

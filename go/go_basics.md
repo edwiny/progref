@@ -394,7 +394,7 @@ Use the builtin function `make` to allocate memory for a new array. It returns a
 b := make([]int, 0, 5) // len(b)=0, cap(b)=5
 ```
 
-To grow a slice, use the builting `appand` function:
+To grow a slice, use the builting `append` function:
 
 
 The first parameter s of append is a slice of type T, and the rest are T values to append to the slice.

@@ -28,7 +28,7 @@ You have the Subject (Publisher) and Dependents (aka Observers aka Subscribers).
 * ConcreteSubject implements SubjectInterface
     * registerObserver()
     * removeObserver()
-    * notifyObservers()
+    * notifyObservers() //calls the update() method on the list of observers registered
     * getState()
     * setState()
 * ObserverInterface
@@ -40,6 +40,9 @@ The ConcreteSubject will call the ConcreteObserver's update() method when its va
 
 
 
+## Popular uses
 
+* JavaBeans
+* Swing libraries
 
 

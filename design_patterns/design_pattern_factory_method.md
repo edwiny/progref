@@ -1,3 +1,0 @@
-# The Factory Pattern
-
-
