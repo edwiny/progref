@@ -20,6 +20,9 @@ Define a interface for creating an object, but let subclasses decide which class
 
 Specify the kinds of objects to create using a prototypical instance, and create new objects via this prototype.
 
+Create new instances of an object by cloning existing instances. The client does not need to know which specific class it is working with.
+
+
 ### Singleton
 
 Ensure a class has only one instance, and provide a global point to access it. 
@@ -33,6 +36,9 @@ Convert the interface of a class to another inteface that clients expect.
 ### Bridge
 
 Decouple an abstraction from it's implementation, so that they can vary independently.
+
+The Bridge pattern allows you to vary not only implementatinos but also abstractions.
+
 
 ### Composite
 
@@ -68,6 +74,8 @@ Encapsulate a request as an object thereby letting you parameerise clients with 
 
 Given a language, define a representation for its grammar along with an interpreter that uses that representation to interpret sentences in that language.
 
+Basically a OO way of building a EBNF parser.
+
 ### Iterator
 
 Provide a way to access the elements of a aggregate object sequentially without exposing its underlying representation.
@@ -79,6 +87,8 @@ Define a object that encapsulates how a set of objects interact. Mediator promot
 ### Memento
 
 Without violating encapsulation, capture and externalise a objects' internal state so it can be saved and restored later.
+
+Useful to impement "undo".
 
 ### Observer
 

@@ -1,6 +1,12 @@
 
 # Design Pattern: Strategy
 
+## Strategy Pattern Definition
+
+Defines a family of algorithms, encapsulates each one, and makes them interchangable. This lets the algorithm vary independently from clients that use it.
+
+My take: a pattern of using composition in stead of inheritance.
+
 
 ## Revisiting Inheritance
 
@@ -85,9 +91,6 @@ public class MallardDuck extends Duck {
 
 
 
-## Strategy Pattern Definition
-
-Defines a family of algorithms, encapsulates each one, and makes them interchangable. This lets the algorithm vary independently from clients that use it.
 
 
 

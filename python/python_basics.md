@@ -1,6 +1,12 @@
 # Python basics
 
 
+## Iteration
+
+## Lists
+
+
+
 ## Dictionaries
 
 ### Checking if key exists

@@ -24,6 +24,338 @@ fun main(args: Array<String>) {
 
 
 
+## Variables
+
+Variables are declared either mutable (`var`) or immutable (`val'):
+
+```
+var mutableVar = "kotlin"
+val immutableVar = "also kotlin"
+
+```
+
+The assignments above uses  *type inference* to assign a type to the variables. To explicitly declare type:
+
+```
+val text: String = "Hello, I am studying Kotlin now."
+val n: Int = 1
+```
+
+Note you can defer initialisation of a val:
+```
+val n: Int
+
+n  = 50
+```
+
+The `val` keyword implies immutable reference.
+
+
+Variables should by default be immutable. Only make it mutable
+when you absolutely have to. Start with immutable and change it later if needed.
+
+
+## Basic Types
+
+Short - 16 bits
+Int   - 32 bits
+Long  - 64 bits
+Float - 32
+Double- 64
+Char  - 16
+Boolean - size not precisely defined
+String
+
+
+
+
+DOES NOT VARY between hardware architectures and operating systems.
+
+Max values:
+
+```
+Int.MIN_VALUE
+Int.MAX_VALUE
+```
+## Type casting
+
+```
+val n: Long = i.toLong()
+```
+
+Avoid casting from Double or Float directly to Short or Char. Cast to int first.
+
+To conver to and from string you can do:
+```
+n.toString()
+"8".toInt()
+"true".toBboolean()
+
+```
+
+## Implicit Type casting
+(char, byte, short) -> Inference
+
+Kotlin will automatically cast values in an expression to the widest type,
+according to this rule:
+nt
+(int, long) -> Long
+(int, float) -> Float
+(*, double) -> Double
+
+The sequence is
+
+* Int
+* Long
+* Float (this is kinda suprising but Long goes up to Float)
+* Double
+
+
+# Constants
+
+```
+const val MYCONST = 1204
+```
+
+NOTE: can only be declared outside of any functions.
+
+
+## Integer Operations
+
+Note: you cannot compare Int and Long for equality! Has to be cast to Long first.
+
+< and > works, though.
+
+
+## Strings
+
+Accessing individual chars:
+
+```
+val greeting = "Hello"
+
+val first = greeting[0]  // 'H'
+val last = greeting[greeting.length - 1] // 'o'
+```
+
+Convenience functions (same as ImmutableList):
+
+```
+println(greeting.first())   // 'H'
+println(greeting.last())    // 'o'
+println(greeting.lastIndex) // 4
+```
+
+Checking for empty string:
+```
+val emptyString = ""
+println(emptyString.length == 0) //true
+println(emptyString.isEmpty()) //true
+```
+
+Strings generally are not modified, in stead new ones are created.
+
+Comparing strings:
+```
+val first = "first"
+val second = "second"
+var str = "first"
+
+println(first == str)    // true
+println(first == second) // false
+println(first != second) // true
+```
+
+Can use ranges to iterate through a string:
+
+```
+val str = "Hello!"
+for (ch in str) {
+    println(ch)    
+}
+```
+
+Getting substrings:
+
+`.substring()` startIndex is inclusive, lastIndex exclusive:
+
+```
+val greeting = "Hello"
+println(greeting.substring(0, 3)) // "Hel"
+//these also take a delimiter arg
+println(greeting.substringAfter('l'))  // "lo"
+println(greeting.substringBefore('o')) // "Hell"
+println(greeting.substringBefore('z')) // "Hello"
+println(greeting.substringAfterLast('l'))  // "o"
+println(greeting.substringBeforeLast('l')) // "Hel"
+```
+
+Replacing:
+
+Note that strings are immutable so these functions return a new string.
+
+```
+val example = "Good morning..."
+println(example.replace("morning", "bye")) // "Good bye..."
+println(example.replaceFirst("one", "two"))
+```
+
+Case:
+
+```
+println(example.lowercase())
+```
+Note: toLowerCase() and toUpperCase() is deprecated
+
+
+## MutableLists
+
+```
+val myList = mutableListOf('elem1', 'elem2')
+val initialisedList = MutableList(2) { "_", "_" }
+```
+
+
+### Useful functions
+
+`.joinToString()`: join to comma seperate list (or other specified delimiter)
+
+Joining lists:
+
+```
+val newList = list1 + list2
+
+//OR
+list1.addAll(list2)
+
+//OR
+list1 += list2
+
+```
+
+Can do a *structural equality* test:
+
+```
+println(firstlist == secondlist)  //checks elements of the lists (must be same order)
+```
+
+`.add(elem)` - appends to end
+`.add(index, elem)` - inserts at pos
+`.remove(elem)` - returns true if found
+`.removeAt(index)` - removes it at pos and return elem removed
+`.clear()` - deletes all elems from list
+
+Copy a list:
+
+```
+val copyList = mutableLisOf<Int>()
+copyList.addAll(list)
+```
+
+Check if empty:
+```
+list.isEmpty()
+```
+
+Search list:
+```
+element in list
+
+//OR
+list.indexOf(element) //returns -1 if not found
+```
+
+Sort a list:
+```
+list.sorted() 
+list.sortedDescending()
+```
+
+## Comparison / Equality
+
+*Structural equality* is when the values of two objects are the same.  E.g.:
+
+```
+val msg1 = "Hi"
+val msg2 = "Hi"
+
+val c1 = Colour("red")
+val c2 = Colour("red")
+```
+
+To check, use `==` or `!=`
+
+*Referential equality* is when two varables are pointing at the same data. E.g.:
+
+```
+val c1 = Colour("red")
+val c2 = c1
+```
+
+To check, use the `===` or '!==` operators.
+
+## Ranges
+
+```
+println(5 in 5..15)  // true
+val withinExclRight = c in a..b - 1 // a <= c && c < b
+val notWithin = 100 !in 10..99 // true
+val within = c in 5..10 || c in 20..30 || c in 40..50 
+```
+Cam also save ranges in vars:
+```
+val range = 100..200
+println(300 in range) // false
+```
+
+Cam also generate strings:
+```
+println('k' in 'a'..'e') // false
+
+println("hello" in "he".."hi") // true
+```
+
+## Loops
+
+`repeat (count) { ... }`
+
+`whil e(expression) { ... }`
+
+`do { ... } while (expression)`
+
+Can `break` out.
+
+Can use ranges:
+
+```
+for (element in source) { ... }
+```
+
+Can also go backward:
+
+```
+for (i in 4 downTo 1) {
+    println(i)
+}
+```
+
+Excluding upper limit:
+```
+for (i in 1 until 4) {
+    println(i)
+}
+```
+
+Can specify a step:
+```
+for (i in 1..7 step 2) {
+    println(i)
+}
+```
+
+Using ranges in loops is kotlin idiomatic.
+
+
 ## Functions
 
 Functions return type can be inferred:
