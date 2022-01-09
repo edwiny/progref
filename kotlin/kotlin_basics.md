@@ -22,6 +22,44 @@ fun main(args: Array<String>) {
 
 ```
 
+## Running from cmdline
+
+```
+sdk install kotlin # on linux
+kotlinc main.kt -include-runtime -d main.jar
+java -jar main.jar
+
+# OR
+
+kotlin -classpath main.jar MainKt
+
+```
+
+Running at kotlin script:
+
+**NB**: Script file extension must be `.kts`.
+
+Example script:
+```
+import java.io.File
+
+val file = File(args[0])
+val lines = file.readLines()
+val sorted = lines.sortedByDescending { it.length }
+
+
+println(sorted.first().length)
+
+```
+
+Then run with:
+
+
+
+```
+kotlinc -script longest.kts -- words_sequence.txt
+```
+
 
 
 ## Variables
@@ -129,6 +167,18 @@ Note: you cannot compare Int and Long for equality! Has to be cast to Long first
 
 ## Strings
 
+* Strings are immutable
+* Chars in a string can be accessed as `s[i]`
+* Can concatenate strings with `+`. 
+
+Printing unicode chars:
+
+```
+println("\u0394")  //code point is in hexadecimal
+```
+
+
+
 Accessing individual chars:
 
 ```
@@ -196,6 +246,7 @@ Note that strings are immutable so these functions return a new string.
 
 ```
 val example = "Good morning..."
+//replaces all occurances in source string
 println(example.replace("morning", "bye")) // "Good bye..."
 println(example.replaceFirst("one", "two"))
 ```
@@ -208,12 +259,79 @@ println(example.lowercase())
 Note: toLowerCase() and toUpperCase() is deprecated
 
 
+Splitting:
+
+```
+var(x, y) = coordInput.split(" ", limit = 2).map { it.toInt() }.toIntArray()
+```
+
+
+
+### Raw Strings
+
+Delimited by """
+
+```
+val text = """
+    for (c in "foo")
+        print(c)
+"""
+```
+
+Using String.trimMargin() you can ensure the whitespace in your source code indenting is not included in the string:
+
+
+```
+val text = """
+    |Tell me and I forget.
+    |Teach me and I remember.
+    |Involve me and I learn.
+    |(Benjamin Franklin)
+    """.trimMargin()
+    
+```
+
+### String templates
+
+```
+val i = 10
+println("i = $i") // prints "i = 10"
+
+// OR
+
+val s = "abc"
+println("$s.length is ${s.length}") // prints "abc.length is 3"
+```
+
+Works also in raw strings.
+
+
+
 ## MutableLists
 
 ```
 val myList = mutableListOf('elem1', 'elem2')
 val initialisedList = MutableList(2) { "_", "_" }
 ```
+
+Creating a empty mutable list:
+
+```
+val arr = mutableListOf<Int>()
+```
+
+Setting an element:
+
+* `add(element)` is a method that adds an extra element to your list.
+* `set(index, element)` replaces the element at the specified position with the specified element. Laconic form:
+mutableList[index] = element
+* `addAll(elements)` adds all of the elements of the specified collection to the end of the list.
+
+Removing elements:
+
+* `removeAt(index)`
+* `remove(element)`
+* `clear()`
 
 
 ### Useful functions
@@ -238,6 +356,8 @@ Can do a *structural equality* test:
 ```
 println(firstlist == secondlist)  //checks elements of the lists (must be same order)
 ```
+
+
 
 `.add(elem)` - appends to end
 `.add(index, elem)` - inserts at pos
@@ -265,11 +385,61 @@ element in list
 list.indexOf(element) //returns -1 if not found
 ```
 
-Sort a list:
+Sort a list by natural order:
 ```
 list.sorted() 
 list.sortedDescending()
 ```
+
+Sort by custom order:
+
+```
+val sorted = lines.sortedByDescending { it.length }
+```
+
+
+Iterating through a list:
+
+```
+for(element in list) {
+ println(element)
+}
+```
+
+if you need to iterate by index:
+
+```
+ for (i in products.indices) {
+        if(products[i] == product) print("$i ")
+    }
+```
+
+## Immutable Lists
+
+Creating a list, the idiomatic way:
+
+```
+val list = listOf("a", "b", "c")
+```
+
+Other ways:
+
+```
+val cars = listOf<String>("BMW", "Honda", "Mercedes")
+```
+Can also use type inference to omit type:
+
+```
+val cars = listOf("BMW", "Honda", "Mercedes")
+```
+
+To create empty list:
+
+```
+val staff emptyList<String>()
+```
+
+
 
 ## Comparison / Equality
 
@@ -315,11 +485,79 @@ println('k' in 'a'..'e') // false
 println("hello" in "he".."hi") // true
 ```
 
+## Arrays
+
+Arrays work a bit differently in Kotlin. Arrays of primitive types have a specific type such as:
+
+```
+IntArray, LongArray, DoubleArray, FloatArray, CharArray, ShortArray, ByteArray, BooleanArray
+```
+
+They can be created by the 'xxxArrayOf` special functions:
+
+```
+val numbers = intArrayOf(1, 2, 3, 4, 5)
+```
+
+To create array of specified size: (values are initialised to 0)
+```
+val numbers = IntArray(5) 
+```
+Can pass in initialisation code:
+
+```
+val numbers = IntArray(5) { readLine()!!.toInt() } 
+
+//OR if on one line:
+
+val numbers = readLine()!!.split(" ").map { it.toInt() }.toTypedArray()
+
+//OR use regex:
+
+val regex = "\\s+".toRegex()
+val nums = str.split(regex).map { it.toInt() }.toTypedArray()
+
+```
+
+NOTE: Arrays cannot change size!
+
+Like with lists, Kotlin provides the following convenience methods for arrays:
+
+```
+println(alphabet.first())   
+println(alphabet.last())    
+println(alphabet.lastIndex) 
+```
+
+Can compare arrays:
+
+```
+val numbers1 = intArrayOf(1, 2, 3, 4)
+val numbers2 = intArrayOf(1, 2, 3, 4)
+
+println(numbers1.contentEquals(numbers2)) // true
+```
+
+For arrays of strings or objects, use `arrayOf` function:
+
+```
+val stringArray = arrayOf("array", "of", "strings")
+//OR
+val stringArray = arrayOf<String>("array", "of", "strings")
+```
+
+Create empty array:
+
+```
+val newEmptyArray = emptyArray<String>()
+```
+
+
 ## Loops
 
 `repeat (count) { ... }`
 
-`whil e(expression) { ... }`
+`while(expression) { ... }`
 
 `do { ... } while (expression)`
 
@@ -355,14 +593,340 @@ for (i in 1..7 step 2) {
 
 Using ranges in loops is kotlin idiomatic.
 
+Can also use `forEach()` function:
+
+```
+val numbers = listOf("one", "two", "three", "four")
+numbers.forEach {
+    println(it)
+}
+```
+
+Return to labels:
+
+```
+loop@ for (i in 1..100) {
+    for (j in 1..100) {
+        if (...) break@loop
+    }
+}
+```
+
+For lambdas:
+
+```
+fun foo() {
+    listOf(1, 2, 3, 4, 5).forEach lit@{
+        if (it == 3) return@lit // local return to the caller of the lambda - the forEach loop
+        print(it)
+    }
+    print(" done with explicit label")
+}
+```
+
+
+## When (switch / case)
+
+```
+when (op) {
+    "+", "plus" -> println(a + b)
+    "-", "minus", -> println(a - b) // trailing comma
+    "*", "times" -> println(a * b)
+    else -> println("Unknown operator")
+}
+```
+
+Can also use blocks:
+```
+"+", "plus" -> {
+        val sum = a + b
+        println(sum)
+    }
+```
+
+Can be used in expression form:
+
+```
+println(when(op) {
+    "+" -> a + b
+    // ...
+    else -> "Unknown operator"
+})
+```
+When using it like this there:
+* must be a else
+* if using block, then last line must contain a value or expression
+
+You can also use expressions before the arrow:
+
+```
+ println(when (c) {
+        a + b -> "$c equals $a plus $b"
+        a - b -> "$c equals $a minus $b"
+        a * b -> "$c equals $a times $b"
+        else -> "We do not know how to calculate $c"
+    })
+```
+Can also use ranges:
+
+```
+when (n) {
+    0 -> println("n is zero")
+    in 1..10 -> println("n is between 1 and 10 (inclusive)")
+    in 25..30, in 40..50 -> println("some other range")
+    else -> println("n is outside a range")
+}
+```
+
+Can also use without when argument:
+
+```
+val n = readLine()!!.toInt()
+    
+    when {
+        n == 0 -> println("n is zero")
+        n in 100..200 -> println("n is between 100 and 200")
+        n > 300 -> println("n is greater than 300")
+        n < 0 -> println("n is negative")
+        // else-branch is optional here
+    }
+```
+
+## Reading input
+
+```
+val line = readline!!()
+```
+
+Can also use Java Scanner library:
+
+```
+val scan = Scanner(System.`in`)
+
+val n = scan.nextLine().trim().toInt()
+```
+in is a Kotlin reserved word
+
+To read multiple ints across multiple lines:
+
+```
+    val scanner = Scanner(System.`in`)
+    while(scanner.hasNextInt()) {
+        val i = scanner.nextInt()
+        println("Int is $i")
+    }
+
+```
+
+
+## Collections
+
+The 3 basic types are:
+
+* List - store elements in order and provides indexed access
+* Set - store unique elements with order undefined
+* Map - store key-value pairs with keys unique
+
+These exist with Mutable and Immutable variations.
+
+All collections have the following common methods:
+
+* `size` returns the size of your collection.
+* `contains(element)` checks if the element is in your collection. (NOTE: but use 'in' instead)
+* `containsAll(elements)` checks if all elements of the collection elements are in your collection.
+* `isEmpty()` shows whether the collection is empty or not.
+* `joinToString()` converts the collection to a string.
+* `indexOf(element)` returns the index of the first entry of the element, or -1 if the element is not in the collection.
+
+Mutable collections have:
+
+* `clear()` removes all elements from the collection.
+* `remove(element)` removes the first occurrence of an element from your collection.
+* `removeAll(elements)` removes from your collection all elements contained in the collection elements.
+
+Idiom: 
+```
+println(elem in collection)
+in stead of
+println(collection.contains(elem))
+```
+
+## Maps
+
+Entries in map are represented by special `Pair` type.
+
+```
+val (name, grade) = Pair("Joe", 5)
+```
+
+It has special `first` and `second` properties:
+
+```
+val p = Pair(2, 3)
+println("${p.first} ${p.second}") // 2 3
+```
+
+The `to` construct is shorthand for creating a `Pair`:
+
+```
+val (name, grade) = "Vlad" to 4
+// same as
+
+val (name, grade) = Pair("Vlad", 4)
+```
+
+
+Initialising maps:
+
+```
+val staff = mapOf<String, Int>("John" to 1000)
+//OR
+val staff = mapOf("Mike" to 1500)  //Idiomatic way
+val carsPerYear = mutableMapOf(1999 to 30000, 2021 to 202111)
+```
+
+Creating empty maps:
+
+
+```
+val emptyStringToDoubleMap = emptyMap<String, Double>()
+```
+
+
+Test key exists:
+
+
+```
+val isWanted = employees.containsKey("Jim")
+```
+
+Can also check if value exists with `containsValue()`
+
+Iterating a Map:
+
+```
+val employees = mapOf(
+    "Mike" to 1500,
+    "Jim" to 500,
+    "Sara" to 1000
+)
+
+for (employee in employees)
+    println("${employee.key} ${employee.value}")
+
+for ((k, v) in employees) //Idiomatic way!
+    println("$k $v")
+```
+
+Mutatating actions:
+
+Setting / adding element:
+
+```
+staff["Nika"] = 999
+
+// or
+
+staff.put("Mike", 999)
+```
+
+Removing element:
+
+```
+map.remove(key)
+
+// OR
+
+cars -= "Kia"  
+```
+
+## Exceptions
+
+
+Exception hierarchy:
+
+* Throwable
+  * Error  -> serious errors that app should not try to handle
+  * Exception -> can be handled
+    * RuntimeException -> normally means insufficient validation in program
+       * ArithmeticException - div by zero
+       * NumberformatException - when converting text to number and text is not number
+       * IndexOutOfBoundException - array index greater than max index
+     
+     
+Throwing exceptions:
+
+`throw Exception("Value can't be negative")`
+
+Catching Exeptions:
+
+```
+try {
+    // code that may throw an exception
+} catch (e: SomeException) {
+    // code for handling the exception
+    println(e.message)
+    
+}
+```
+
+Can catch multiple exceptions by adding additional catch clauses:
+
+```
+try {
+    // code that throws exceptions
+}
+catch (e: IOException) {
+    // handling the IOException and its subtypes   
+}
+catch (e: Exception) {
+    // handling the Exception and its subtypes
+}
+```
+The catch block with the base type has to be written below all the blocks with subtypes. In other words
+
+
+Finally:
+
+All the statements present in this block will always execute regardless of whether an exception occurs in the try block or not.
+
+```
+try {
+    // code that may throw an exception
+}
+catch (e: Exception) {
+    // exception handler
+}
+finally {
+    // code is always executed
+    //close a file
+    
+}
+```
+It is possible to omit the catch statement. 
+The `finally` block will run even if we don't catch the exception.
+
+
+Exceptions can be treated as expressions, ie they can yield a value:
+
+```
+val number: Int = try { "abc".toInt() } catch (e: NumberFormatException) { 0 }
+```
+This is also the kotlin-idiomatic way of handling exceptions.
+
+Value must be returned in either the last expression in the try block or the last expression in the catch block(s). The contents of the finally block do not affect the result of the expression
+
 
 ## Functions
+
 
 Functions return type can be inferred:
 
 ```
 fun sum(a: Int, b: Int) = a + b
 ```
+
+
 
 Remarks:
 
@@ -435,41 +999,75 @@ In Kotlin functions can be declared at top level in a file, meaning you do not n
 .Kotlin functions can also be declared local, as member functions and extension functions.
 
 
-## Lambdas
-
-Functions are *first-class* i.e. they can be stored in variables and passed around as arguments.
-
-Higher-order functions are functions that take functions are arguments or return them.
-
-Lambda expressions are often used to *instantiate* specific higher-order function types.
-
-Example of passing in a lambda expression as an argument:
-
-```
-acc: Int, i: Int -> 
-    print("acc = $acc, i = $i, ") 
-    val result = acc + i
-    println("result = $result")
-    // The last expression in a lambda is considered the return value:
-    result
-```
-
-The paramater types are optional as they can be inferred, and the value of the last expression is returned, so this enables us to shorten to:
-
-```
-acc, i -> acc + i
-```
-
-Context of a function call:
-
-```
-val joinedToString = items.fold("Elements:", { acc, i -> acc + " " + i })
-```
-
 
 ### Function types
 
-There a 3 classes of function types - regular function types, receiver function types, and suspend function types:
+
+The type of the following function:
+
+```
+fun sum(a: Int, b: Int): Int = a + b
+```
+is:
+```
+(Int, Int) -> Int
+```
+
+For:
+```
+fun sayHello() {
+    println("Hello")
+}
+```
+Type is:
+```
+() -> Unit
+```
+
+### Function references
+
+You can obtain a reference to a function using the `::` operator.
+
+If there is a `sum()` function at the global scope, then reference would be:
+`::sum``
+
+This can be assigned to a var like:
+
+```
+// type inferred
+val sumObject = ::sum
+
+// type explicit
+val sumObject: (Int, Int) -> Int = ::sum
+
+
+sumObject(10, 20)
+```
+
+Functions can return references to functions, e.g.:
+
+```
+fun getScoringFunction(isCheater: Boolean): (Double) -> Double {
+    if (isCheater) {
+        return ::getGradeWithPenalty
+    }
+
+    return ::getRealGrade
+}
+```
+
+Functions can reference functions as parameters:
+
+```
+fun applyAndSum(a: Int, b: Int, transformation: (Int) -> Int): Int {
+    return transformation(a) + transformation(b)
+}
+```
+
+This forms the basis of **functional programming** - functions taking other functions as arguments.
+
+
+There 3 classes of function types - regular function types, receiver function types, and suspend function types:
 
 ```
 (A,B) -> C
@@ -506,11 +1104,142 @@ typealias ClickHandler = (Button, ClickEvent) -> Unit
 ```
 
 
-### Instantiating function types
 
-#### Lambdas
+## Lambdas
 
-Lambda expressions are basically instantiating function types.
+Lambda expressions are basically instantiating function types. Aka anonymous functions.
+
+* `fun(arguments): ReturnType { body }` - anonymous function
+* `{ arguments -> body }` - lambda expression
+
+
+E.g:
+
+```
+fun(a: Int, b: Int): Int {
+    return a * b
+}
+
+{ a: Int, b: Int -> a * b }
+```
+
+
+You can also define a lambda without arguments, then don't need the arrow sign:
+
+`{ body }`
+
+
+Progression through syntactic sugar:
+These are all equivalent:
+
+```
+fun isNotDot(c: Char): Boolean = c != '.'
+val originalText = "I don't know... what to say..."
+val textWithoutDots = originalText.filter(::isNotDot)
+```
+Rewrite to a lambda expression:
+```
+val originalText = "I don't know... what to say..."
+val textWithoutDots = originalText.filter({ c: Char -> c != '.' })
+```
+
+Types for the parameters can be inferred:
+
+```
+originalText.filter({ c -> c != '.' })
+```
+
+If lamdba is last parameter, we can put it outside the ():
+```
+originalText.filter() { c -> c != '.' }
+```
+
+If parameter list is empty, we can omit ():
+
+```
+originalText.filter { c -> c != '.' }
+```
+
+If there is only 1 parameter to the lambda, it can use the implicit paramater `it`:
+```
+val originalText = "I don't know... what to say..."
+val textWithoutDots = originalText.filter { it != '.' }
+```
+
+### Multiline lambdas
+
+The value of the last expression is returned.
+
+E.g.:
+
+```
+val textWithoutSmallDigits = originalText.filter {
+    val isNotDigit = !it.isDigit()
+    val stringRepresentation = it.toString()
+
+    isNotDigit || stringRepresentation.toInt() >= 5
+}
+```
+
+Can return early in a lambda using a *qualified return statement* - normally the function name that the lambda is a argument to:
+
+```
+val textWithoutSmallDigits = originalText.filter {
+    if (!it.isDigit()) {
+        return@filter true
+    }
+        
+    it.toString().toInt() >= 5
+}
+```
+
+### Capturing variables
+
+One of the bid advantages of lambdas are that they can access the variables from the same
+scope as where the lambda is defined.
+
+When the lambda references a variable defined outside the lambda it's said to be *capturing* that variable.
+
+For example:
+
+```
+var count = 0
+
+val changeAndPrint = {
+    ++count
+    println(count)
+}
+
+println(count)    // 0
+changeAndPrint()  // 1
+```
+
+
+### Examples
+
+Valid anon fn and lambda expressions:
+
+```
+fun(number: Int) = number.toString()
+
+fun(number: Int): String { return number.toString() }
+
+{ number: Int -> number.toString() }
+
+```
+
+Incorrect expressions:
+
+```
+(number: Int) -> { number.toString() }
+
+(number: Int) => { number.toString() }
+
+{ number: Int => number.toString() }
+```
+
+
+### Notes from the standard docs
 
 A lambda expression is always surrounded by curly braces, parameter declarations in the full syntactic form go inside curly braces and have optional type annotations, the body goes after an -> sign. If the inferred return type of the lambda is not Unit, the last (or possibly single) expression inside the lambda body is treated as the return value.
 
@@ -525,6 +1254,8 @@ val sum: (Int, Int) -> Int = { x: Int, y: Int -> x + y }
 val sum = { x: Int, y: Int -> x + y }
 
 ```
+
+
 
 **Trailing lambdas**
 
@@ -628,50 +1359,6 @@ Anonymous function syntax allows you to specify the type of the receiver explici
 val sum = fun Int.(other: Int): Int = this + other
 ```
 
-
-## Strings
-
-* Strings are immutable
-* Chars in a string can be accessed as `s[i]`
-* Can concatenate strings with `+`. 
-
-### Raw Strings
-
-Delimited by """
-
-```
-val text = """
-    for (c in "foo")
-        print(c)
-"""
-```
-
-Using String.trimMargin() you can ensure the whitespace in your source code indenting is not included in the string:
-
-
-```
-val text = """
-    |Tell me and I forget.
-    |Teach me and I remember.
-    |Involve me and I learn.
-    |(Benjamin Franklin)
-    """.trimMargin()
-    
-```
-
-### String templates
-
-```
-val i = 10
-println("i = $i") // prints "i = 10"
-
-// OR
-
-val s = "abc"
-println("$s.length is ${s.length}") // prints "abc.length is 3"
-```
-
-Works also in raw strings.
 
 
 ## Classes

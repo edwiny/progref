@@ -11,3 +11,10 @@
 | -------------------- | ---------------------------------- |
 | Ctrl-D               | Copy line to below |
 
+
+## Automation
+
+| Key                  | Effect                             |
+| -------------------- | ---------------------------------- |
+| Alt-Enter            | Brings up Context Actions menu |
+| Ctrl-Space           | Suggest variable name          |
