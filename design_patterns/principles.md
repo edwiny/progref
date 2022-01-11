@@ -71,6 +71,10 @@ Every responsibility of a class is a potential reason for change. More than one 
 **Cohesion** is the measure of how well a class is designed around a set of related functions.
 Unrelated functions means the class has low cohesion.
 
+The core of the principle is not about breaking the code into small isolated pieces. You gather what belongs to the same responsibility in one place, and then separate units with different responsibilities from one another.
+
+We're trying to avoid "God objects": objects that know everything and tries to do everything.
+
 ## Principle of Least Knowledge
 
 Talk only to your immediate friends.

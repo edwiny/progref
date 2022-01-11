@@ -937,13 +937,20 @@ Remarks:
 
 ### Default parameters
 
-Function parameters can have default values e.g. `fun read( b: Array<Byte>, off: Int = 0)` to reduce number of method overloads
+Function parameters can have default values e.g. 
+
+```
+fun read( b: Array<Byte>, off: Int = 0)
+```
+
+
+to reduce number of method overloads
 
 ### Named arguments
 
 When calling a function you can include the name of the parameter and mix it with positional arguments e.g.:
 
-'
+```
 reformat(
     'String!',
     false,
@@ -951,9 +958,16 @@ reformat(
     divideByCamelHumps = true,
     '_'
 )
-`
+```
+
+
 
 Any named arguments omitted will use the default values.
+
+Reasons for using it:
+* Improve readability
+* Arguments order no longer important
+
             
 
 ### Single-expression functions
@@ -1370,11 +1384,15 @@ Class declarations consist of the class name, class header (optional) and class 
 **Primary constructor** goes in the class header:
 
 ```
-class Person constructor(firstName: String) { /* class body */ }
+class Person(firstName: String) 
+{ /* class body */ }
 
-// OR if no annotations required on constructor:
+//OR if annotations required:
 
-class Person(firstName: String) { /* class body */ }
+class Person constructor(firstName: String) 
+{ /* class body */ }
+
+
 
 ```
 The primary constructor cannot contain any code. 
@@ -1382,7 +1400,10 @@ The primary constructor cannot contain any code.
 You can use `val` and `var` in the primary constructor parameter list to automatically defines class properties from
 the parameter list and assign the values passed in at create time. 
 
-When you write val/var within the constructor, it declares a property inside the class. When you do not write it, it is simply a parameter passed to the primary constructor, where you can access the parameters within the init block or use it to initialize other properties. 
+When you write val/var within the constructor, it declares a property inside the class.
+
+**NB**:
+When you do not write it, it is simply a parameter passed to the primary constructor, where you can access the parameters within the init block or use it to initialize other properties. 
 
 If all you're going to do with the argument is pass to super class, then do not use var or val.
 
@@ -1446,6 +1467,15 @@ class Person(val name: String) {
 ```
 
 If a non-abstract class does not declare any constructors (primary or secondary), it will have a generated primary public constructor with no arguments. 
+
+### Order of initialisation
+
+
+1. primary constructor 
+2. top-level class property declarations
+3. code in `init` blocks
+4. secondary constructors
+
 
 ### Creating classes
 
@@ -1878,7 +1908,7 @@ when (x) {
 }
 ```
 
-Can use to replace if statements (no argument supplied):
+Can use to replace if statements (NOTE: no argument supplied)
 
 ```
 when {
@@ -1897,6 +1927,37 @@ fun Request.getBody() =
             is HttpError -> throw HttpException(response.status)
         }
 ```
+It's Kotlin idiomatic to use when as an expression esp 
+when returning a value): e.g.:
+
+```
+fun transform(color: String): Int = when (color) {
+    "Red" -> 0
+    "Green" -> 1
+    "Blue" -> 2
+    else -> throw IllegalArgumentException("Invalid color param value")
+}
+
+```
+## Assertions
+
+Helps to enforce *invariants* (conditions that require correct operation of the program)
+
+
+* `check`: when you want to validate the state of an object
+* `require` when checking the value of an argument passed. Throws an Exception if the condition in the parentheses is evaluated to false
+
+E.g.:
+```
+class Cat(val name: String, val age: Int) {
+    val enoughCat = false // Of course, it's a false, there are never enough cats!
+    init {
+        check(!enoughCat) { "You cannot add a new cat" } // IllegalStateException
+        require(age >= 0) { "Invalid age: $age" }        // IllegalArgumentException
+    }
+}
+```
+
 
 
 
