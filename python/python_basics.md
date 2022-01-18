@@ -1,5 +1,6 @@
 # Python basics
 
+
 ## Variables
 
 Variables in Python are references to objects.
@@ -242,6 +243,11 @@ TypeError: 'str' object does not support item assignment
 'The value is 20 and one more is 21'
 ```
 
+Formatting decimal places:
+
+```
+f"cost $ {price:..2f}"
+```
 
 
 
@@ -663,21 +669,209 @@ This allows you to create nested sets (normally you can't because sets are mutab
 
 Unlike with regular setes, Augmented assignment operators return new frozensets.
 
+## Program lexical structure
+
+### Line continuation
+
+**Implicit continuation** is where brackets or parenthesis are used. Python will assume a single statement until all matchines parenthesis are parsed:
+
+```
+a = [
+    [ 1, 2, 3 ],
+    [ 10, 20, 30 ]
+    ]
+```
+
+PEP-8 (style guide) actually recommends parenthesis:
+
+```
+val = (
+    a > b &&
+    a < 10
+    )
+```
+
+Curl braces also work.
+
+
+**Explicit continuation**
+
+Can use backslash as last char on line to continue as well but it's not recommended in general.
+Multiple statements separated by `;` also works but is Not Pythonic.
+
+
+### Docstrings
+
+Triple quoted strings within a function are treated as docstrings:
+
+
+```
+def func1(): 
+"""This functions does blah"""
+   return blah
+    
+```
+
+
+
+
+## Functions
+
+```
+def f():
+  s = "blah"
+  return s
+```
+
+function stub:
+
+```
+def f():
+   pass
+```
+
+Different ways to provide arguments:
+### positional args (reguar way)
+* order matters
+
+
+### keyword arguments
+* caller provides arg names e.g. f(price=5)
+* order no longer matters
+* assign default values in function declaration to make argument optional, e.g. `def f(price=0):`
+  
+
+WARNING: mutable default arguments
+
+Default arguments are defined once when the function is declared. When you call the function, the reference to the exisitng object is re-used. So if default argument is a mutable object, the *mutations will persist* across function calls.
+
+To get around it, use immutable default values.
+
+### Pass-by-assignment aka pass-by-object reference
+
+Basically everything is an object in Python and variables are just references to those objects.
+
+So assginment and paramaers are just ways of assigning names to objects. THe variables and argument names have their own values and it points to object references.
+
+
+### Argument tuple packing (aka varargs) *
+
+Argument name can be preceded by a `*`, any corresponding args in calls will be packed into a tuple. The convention is to name the tuple `*args`:
+
+E.g.:
+```
+fun f(*args):
+   for arg in args:
+      do_something(arg)
+```
+
+Unpacking - passing tuples in as arguments:
+
+```
+t  = (1, 2, 3)
+f(*t)
+```
+
+### Argument dictionary packing and unpacking **
+
+Prepending `**` before argument name in the declaration specifies keyword args will be packed into the named dictionary. Convention: `**kwargs`
+
+```
+def f(**kwargs):
+   for key, val in kwargs.items():
+      print(key, '->', val)
+f(foo=1, bar=2, baz=3)
+
+```
+
+Unpacking:
+
+```
+d = { 'foo': 1, 'bar':2, 'baz':3 }
+f(**d)
+```
+### Using argument packing with keyword ares
+
+The packed argument must come first, the keyword args must come last and have a default value.
+
+### Bare variable argument parameter
+
+Specifies end to tuple packing
+
+```
+def f(a, b, *, op="+")
+```
+
+### Function annotations (3.x)
+
+* Attach metadata to a functions' paramaters and return value
+* Used by adding a `:` after the parameter name.
+* For return values, add a `->` between the `)` and the ending ':'
+* annotations can be expressions or objects
+
+e.g.
+
+```
+def f(a:'metadata1', b:'metadata2') -> 'ret_meta':
+  return "bla"
+  
+```
+
+Annotations are stored as a dictionary in
+
+```
+fn.__annotations__
+```
+
+E.g.:
+
+```
+n [1]: def f(a: int, b: str) -> float:
+   ...:     return 1.0
+   ...: 
+
+In [2]: f.__annotations__
+Out[2]: {'a': int, 'b': str, 'return': float}
+
+```
+
+
+#### Type hinting
+
+A common use is to do type hinting:
+
+```
+def f(a: int, b: str) -> float:
+```
+Functionally they don't do any actual validation, just shows up in IDEs.
+
+### Profiling
+
+You can store data in the `__annotations__` dictionary and update with each function call, so can collecting timings or counters.
+
 
 
 ## Iteration
 
-## Lists
+## IO
+
+### Console
+```
+name = input("What is your name?")
+```
+Note that the type returns is a string, there's no magic conversation if you input a int.
+Needs to be converted to the type you're expecting.
 
 
+## Classes
 
-## Dictionaries
-
-### Checking if key exists
-
+### Calling a parent's constructor
 
 ```
-if 'key' in 'thedict':
-   print("found")
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        super(Player, self).__init__()
 ```
+
+
 

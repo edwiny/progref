@@ -74,3 +74,46 @@ s = "hello"
 ```
 
 
+### Display docstrings for a function
+
+```
+help(fn)
+
+also available as
+
+fn.__doc__
+```
+
+# Find symbols in local scope
+
+```
+locals()
+```
+
+# Inspect import path
+
+```
+>>> import sys
+>>> sys.path    
+['', '/usr/local/lib/python37.zip', '/usr/local/lib/python3.7', '/usr/local/lib/python3.7/lib-dynload', '/home/syoung/.virtualenvs/pygame/lib/python3.7/site-packages']
+```
+
+# Find installation path of a imported module
+
+```
+>>> import re
+>>> re.__file__
+'/usr/local/lib/python3.7/re.py'
+```
+
+# Inspect symbols in symbol table
+
+To see which variables and symbols are accessible from current namespace, do:
+
+```
+dir()
+
+dir(modulename)
+```
+
+

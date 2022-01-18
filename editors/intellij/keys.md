@@ -1,9 +1,27 @@
+## Searching
+
+| Key                  | Effect                             |
+| -------------------- | ---------------------------------- |
+| Ctrl-Shift-A         | Find Action - to learn the shortcuts |
+
+## Navigation
+
+| Key                  | Effect                             |
+| -------------------- | ---------------------------------- |
+| Ctrl-Shift-P         | Reveal type of highlighted expresssion |
+| Ctrl-B               | Go to definition. Press again to go to usages |
+| Ctrl-N               | Nagivate to class                   |
+| Ctrl-Left/Right      | Next/Prev word                      |
+
+
+
 ## Inspecting
 
 | Key                  | Effect                             |
 | -------------------- | ---------------------------------- |
 | Ctrl-Shift-P         | Reveal type of highlighted expresssion |
-
+| Ctrl-Shift-I         | Show popup window of method definition |
+| Ctrl-Q               | Displays documentation for cursored |
 
 ## Copying
 
@@ -11,10 +29,35 @@
 | -------------------- | ---------------------------------- |
 | Ctrl-D               | Copy line to below |
 
+## Editing
+
+| Key                  | Effect                             |
+| -------------------- | ---------------------------------- |
+| Ctrl-X               | Cut current line                   |
+| Ctrl-D               | Duplicate current line             |
+| Ctrl-/               | Comment / uncomment current line|
+| Ctrl-Shift-/         | Block Comment / uncomment selected text |
+| Ctrl-J               | Live templates / code snippets |
+| Ctrl-Space           | Autocompletion                 |
+| Alt-Enter            | Brings up Context Actions menu |
+
 
 ## Automation
 
 | Key                  | Effect                             |
 | -------------------- | ---------------------------------- |
-| Alt-Enter            | Brings up Context Actions menu |
-| Ctrl-Space           | Suggest variable name          |
+
+| Ctrl-Alt-Shift-Insert| New Scratch file               |
+| Shift-F0             | Run debugger                   |
+| Shift-F10            | Run                            |  
+| F8                   | Step  over                     |
+
+
+
+## Debugging features
+
+* Can set breakpoint on constructors (click next to class name and see the req square)
+* Run -> View breakpoints: allows you to set breakpoints on exceptions
+* While debugging, click on line number to Run to Cursor there.
+
+

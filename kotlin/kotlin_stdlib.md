@@ -81,5 +81,46 @@ File(fileName).writeBytes(arrayOfBytes)
 
 ## Logging
 
+## Math
+
+```
+import kotlin.math.*
+```
+
+Common functions, works with Int, Long, Float, Double:
+
+* abs(n)
+* min(a,b)
+* max(a,b)
+* x.pow(n)
+* sqrt(n)
+* exp(n)
+* log(x, base)
+* floor(x)
+* ceil(x)
+* round(x)
+* roundToInt() 
+
+## Random
+
+```
+import kotlin.random.Random
+
+// generates an integer value between 1 (inclusive) and 100 (exclusive)
+Random.nextInt(1, 100) 
+
+// generates a double value between 0.0 (inclusive) and 5.0 (exclusive)
+Random.nextDouble(0.0, 5.0) 
+```
+
+Seeding:
+
+```
+val randomGenerator = Random(42)
+OR: 
+val defaultGenerator = Random.Default 
+randomGenerator.nextInt(100)
+```
+
 
 

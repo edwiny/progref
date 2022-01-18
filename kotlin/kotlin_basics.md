@@ -306,6 +306,64 @@ println("$s.length is ${s.length}") // prints "abc.length is 3"
 Works also in raw strings.
 
 
+## Casting
+
+### is operator
+
+Can check type of any object:
+
+```
+if (obj is String) {
+    print(obj.length)
+}
+```
+
+### Smart Casts
+
+Kotlin compiler "caches" the `is` checks and can automaticall insert a cast after a `is` check has been done:
+
+
+```
+fun demo(x: Any) {
+    if (x is String) {
+        print(x.length) // x is automatically cast to String
+    }
+}
+```
+
+Example: the following Java code:
+
+```
+public int eval(Expr expr) {
+    if (expr instanceof Num) {
+        return ((Num) expr).getValue();
+    }
+    if (expr instanceof Sum) {
+        Sum sum = (Sum) expr;
+        return eval(sum.getLeft()) + eval(sum.getRight());
+    }
+    throw new IllegalArgumentException("Unknown expression");
+}
+```
+
+can be rewritten in Kotlin as:
+
+
+```
+fun eval(expr: Expr): Int =
+        when (expr) {
+            is Num -> expr.value
+            is Sum -> eval(expr.left) + eval(expr.right)
+            else -> throw IllegalArgumentException("Unknown expression")
+        }
+
+interface Expr
+class Num(val value: Int) : Expr
+class Sum(val left: Expr, val right: Expr) : Expr
+```
+
+
+
 
 ## MutableLists
 
@@ -919,7 +977,6 @@ Value must be returned in either the last expression in the try block or the las
 
 ## Functions
 
-
 Functions return type can be inferred:
 
 ```
@@ -1379,6 +1436,8 @@ val sum = fun Int.(other: Int): Int = this + other
 
 Class declarations consist of the class name, class header (optional) and class body (optional).
 
+NOTE: Kotlin calls methods "member functinos".
+
 ### Constructors
 
 **Primary constructor** goes in the class header:
@@ -1675,6 +1734,34 @@ if (foo::bar.isInitialized) {
 }
 
 ```
+### Nested Classes vs Inner Classes
+
+Can declare a class inside another clawss - this is a Nested Class. It can't access the properties or methods from the outer class.
+
+To create nested class, it works like a class method:
+
+```
+val inner = Outer.Inner()`
+```
+
+Can be declared with special keyword `inner` whuch grants access to our classes data and methods.
+
+To access the inner class, an instance of the outer class first needs to be created:
+
+```
+val outer = Outer()
+val inner = outer.Inner()
+```
+
+To access a shadowed instance of a parent class property:
+
+```
+val x = this@ParentClass.color
+```
+
+
+When to use inner classes:
+* Inner classes are somewhat hidden so as such helps to improve the encapsulation and/or the organisation of a larger, more complex class.
 
 
 ### Data Classes
@@ -1859,86 +1946,6 @@ list.swap(0, 2) // 'this' inside 'swap()' will hold the value of 'list'
 
 
 
-
-
-## Control flow
-
-### if
-
-If statements are expressions in Kotlin, i.e. they return values. That is why there's no ternary operator:
-
-```
-val max = if (a > b) a else b
-```
-
-The last expression is the value of the block:
-
-```
-val max = if (a > b) {
-    print("Choose a")
-    a
-} else {
-    print("Choose b")
-    b
-}
-```
-
-If you're using if as an expression rather than a statement (for example, returning its value or assigning it to a variable), the expression is required to have an else branch.
-
-
-
-### when
-
-Replaces the `switch` statement from other languages:
-
-```
-when (x) {
-    1 -> print("x == 1")
-    2 -> print("x == 2")
-    
-    # can use commas to group common matches
-    0, 1 -> print("x == 0 or x == 1")
-    
-    in 1..10 -> print("x is in the range")
-    in validNumbers -> print("x is valid")
-    
-    else -> { // Note the block
-        print("x is neither 1 nor 2")
-    }
-}
-```
-
-Can use to replace if statements (NOTE: no argument supplied)
-
-```
-when {
-    x.isOdd() -> print("x is odd")
-    y.isEven() -> print("y is even")
-    else -> print("x+y is even.")
-}
-```
-
-Can also be treated as expression, i.e. assign to a variable:
-
-```
-fun Request.getBody() =
-        when (val response = executeRequest()) {
-            is Success -> response.body
-            is HttpError -> throw HttpException(response.status)
-        }
-```
-It's Kotlin idiomatic to use when as an expression esp 
-when returning a value): e.g.:
-
-```
-fun transform(color: String): Int = when (color) {
-    "Red" -> 0
-    "Green" -> 1
-    "Blue" -> 2
-    else -> throw IllegalArgumentException("Invalid color param value")
-}
-
-```
 ## Assertions
 
 Helps to enforce *invariants* (conditions that require correct operation of the program)
@@ -1961,68 +1968,10 @@ class Cat(val name: String, val age: Int) {
 
 
 
-## Casting
-
-### is operator
-
-Can check type of any object:
-
-```
-if (obj is String) {
-    print(obj.length)
-}
-```
-
-### Smart Casts
-
-Kotlin compiler "caches" the `is` checks and can automaticall insert a cast after a `is` check has been done:
-
-
-```
-fun demo(x: Any) {
-    if (x is String) {
-        print(x.length) // x is automatically cast to String
-    }
-}
-```
-
-Example: the following Java code:
-
-```
-public int eval(Expr expr) {
-    if (expr instanceof Num) {
-        return ((Num) expr).getValue();
-    }
-    if (expr instanceof Sum) {
-        Sum sum = (Sum) expr;
-        return eval(sum.getLeft()) + eval(sum.getRight());
-    }
-    throw new IllegalArgumentException("Unknown expression");
-}
-```
-
-can be rewritten in Kotlin as:
-
-
-```
-fun eval(expr: Expr): Int =
-        when (expr) {
-            is Num -> expr.value
-            is Sum -> eval(expr.left) + eval(expr.right)
-            else -> throw IllegalArgumentException("Unknown expression")
-        }
-
-interface Expr
-class Num(val value: Int) : Expr
-class Sum(val left: Expr, val right: Expr) : Expr
-```
-
-
 ## Object Expressions
 
 Useful for when you need to create a slight modification of an object without needing to declare a subclass.
 
-### Object Expressions
 
 This is essentially an *anonymous class*:
 
@@ -2064,7 +2013,146 @@ fun foo() {
 *NOTE*: code in the anonymous object can access the variables from the enclosing scope.
 
 
-### Object declarations
+## Object declarations / nested objects
+
+### Singletons
+
+Useful to manage global vars and static methods.
+
+The `object` keyword allows you to create a class as a singleton. You can't instantiate this class, but you can use it like a static class:
+
+```
+
+object Single {
+    var refs = 0
+}
+
+...
+val o1 = Single.refs
+```
+
+This can be used to implement defaults e.g.:
+
+```
+class Cell(var width: Int = BaseProperties.width,
+           var height: Int = BaseProperties.height) {
+           
+   object BaseProperties {
+       var width = 10
+       var height = 10
+    }
+}
+```
+Can also do it like:
+
+```
+class Cell {
+    object BaseProperties {
+        var width = 10
+        var height = 10
+    }
+    var width = BaseProperties.width
+    var height = BaseProperties.height
+}
+
+```
+
+
+### Factory
+
+```
+class Player(val id: Int) {
+    /* creates a new instance of Player */
+    object Factory {
+        fun create(playerId: Int): Player {
+            return Player(playerId)
+        }
+    }
+}
+
+
+
+val p13 = Player.Factory.create(13)
+
+```
+
+### Static variables and methods
+
+Can declare a `object` as a nested class to implement static methods and vars (Kotlin doesn't have `static`):
+
+```
+class Player(val id: Int) {
+    object Properties {
+        val defaultSpeed = 7
+    }
+    //NOTE we use it like a static class
+    val superSpeed = Properties.defaultSpeed * 2 // 14
+}
+...
+
+val s = Player.Properties.defaultSpeed
+```
+NOTE: the nested object cannot access members from the outer class.
+
+
+## Companion objects
+
+tl;dr: provides "global variables" per class.
+
+Very similar to nested objects but differs in these ways:
+
+* can omit name, making it shorter to access the companion object's members
+* can have only one per class
+* can only exist within the context of a super class
+
+Similarities:
+* also a singleton
+
+
+Example:
+
+```
+class Dog {
+    companion object {
+        val numOfPaws: Int = 4
+        fun createSound(): String = "WUF-WUF"
+    }
+}
+/*prints WUF-WUF*/
+println(Dog.createSound())
+```
+
+Outer class can access the companion object's members but not the other way around:
+
+```
+class Deck {
+    companion object {
+        val size = 10
+        val height = 2
+        fun volume(bottom: Int, height: Int) = bottom * height
+    }
+
+    val square = size * size             //100
+    val volume = volume(square, height)  //200
+}
+```
+Companion objects can be named.
+It has a default name if left unspecified: `Companion`
+
+When companion and outer class has same variable names,
+the class will shadow the companion.
+
+Can use `Companion` to still reference them:
+
+```
+class Deck {
+    companion object {
+        val size = 10
+    }
+    val size = 2
+    val square = Companion.size * Companion.size // 100
+}
+```
 
 
 
@@ -2072,7 +2160,6 @@ fun foo() {
 
 
 * Each enum constant is an object.
-* 
 
 Basic usage:
 
@@ -2098,36 +2185,44 @@ val ordinal: Int
 ```
 
 
-Enum classes in Kotlin have synthetic methods allowing to list the defined enum constants and to get an enum constant by its name:
-(EnumClass represents the particular enum you're working with)
-
+Enum builtin methods:
 ```
 EnumClass.valueOf(value: String): EnumClass
+```
+The value in this case is string version of the enum value typically in upper case.
+
+
+```
 EnumClass.values(): Array<EnumClass>
 ```
 Throws `IllegalArgumentException` if value doesn't exist.
 
-
-## Static properties
-
-In class definition:
+If you want to extend the Enum you need to use a Companion object:
 
 ```
-companion object {
-  private val log = LoggerFactory.getLogger(CollectionRunnerService::class.java)
-  val DELAY_WHEN_MAX_REQUESTED: Duration = Duration.ofHours(1)
+enum class Rainbow(val color: String, val rgb: String) {
+    RED("Red", "#FF0000"),
+    ORANGE("Orange", "#FF7F00"),
+    YELLOW("Yellow", "#FFFF00"),
+    GREEN("Green", "#00FF00"),
+    BLUE("Blue", "#0000FF"),
+    INDIGO("Indigo", "#4B0082"),
+    VIOLET("Violet", "#8B00FF"),
+    NULL("", "");
+
+    companion object {
+        fun findByRgb(rgb: String): Rainbow {
+            for (enum in Rainbow.values()) {
+                if (rgb == enum.rgb) return enum
+            }
+            return NULL
+        }
+    }
+
+    fun printFullInfo() {
+        println("Color - $color, rgb - $rgb")
+    }
 }
 ```
 
-
-## Static methods
-
-In class definition:
-
-```
-companion object {
-        fun getConfigForEnvironment(environment : String): Configuration { ... }
-}
-
-```
 
