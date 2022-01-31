@@ -538,6 +538,27 @@ Cam unpack multiple items into a var as a list
 <class 'list'>
 ```
 
+### Sorting
+
+```
+t = ("1", "11", "2", "12")
+
+sorted(t)
+>>> ['1', '11', '12', '2']
+
+sorted(t, key=int)
+>>> ['1', '2', '11', '12']
+
+sorted(t, key=lambda s: int(s))
+
+```
+	
+`key` is the name of a function that takes *one* argument and returns a numerical representation.
+
+There's also a `reverse=True` argument you can pass.
+
+
+
 ### Dictionaries
 
 * keys must be immutable
@@ -586,6 +607,14 @@ Common idiom:
 * `list(d.keys())` - returns list of keys (by itself it returns `dict_keys` type
 * `list(d.values())` - same as keys()
 * `d.update(d1)` - merge d1 into d, overriding any elements with same keys
+
+#### Iterating a dictionary
+
+```
+for k, v in d.items():
+   print('k =', k, ', v =', v)
+```
+
 
 
 ### Sets
@@ -851,7 +880,100 @@ You can store data in the `__annotations__` dictionary and update with each func
 
 
 
+## Enums
+
+```
+from enum import Enum
+
+
+class WaveState(Enum):
+    ADVANCING = 1
+    RETREATING = 2
+
+```
+
+
+
 ## Iteration
+
+
+The `for` loop can only do iterator based looping.
+You pass it a Iterable on which tt calls `iter()` which returns an Iterator.
+
+```
+a = [ 1, 2, 3]
+for i in a:
+```
+This would:
+* call `iter()` on  the list `a`
+* calls `next()` in each loop iteration
+* terminators the loop when `next()` yields a `StopIteration` exception.
+* the value returned by next() is assigned to i.
+
+### Iterating a dictionary:
+
+```
+for k, v in d.items():
+   print('k =', k, ', v =', v)
+```
+
+### range()
+
+range(<begin>, <end>, <stride>) returns an iterable that yields integers starting with <begin>, up to but not including <end>. If specified, <stride> indicates an amount to skip between values
+
+
+## Exceptions
+
+
+### Raising exceptions
+
+````
+
+if some_error_cond:
+   raise Exception("error message")
+```
+
+### Handling Exceptions
+
+```
+   try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except HTTPError as err:
+        print(f"{url} Failure with code {response.status_code}")
+    except Exception as err:
+        print(f"{url} Some non-HTTP error occurred")
+    else:
+        print(f"{url} Success")
+
+```
+
+Full syntax:
+
+```
+try:
+   run this code
+except <ExceptionClass> as <exception var>:
+   when error occurs
+else:
+   no exceptions? run this
+funally:
+   always run this
+   
+```
+
+
+
+### Assertions
+
+```
+import sys
+assert ("linux" in sys.platform), "The code runs on linux only")
+```
+
+Throws an **AssertionError** exception.
+
+
 
 ## IO
 
@@ -863,7 +985,288 @@ Note that the type returns is a string, there's no magic conversation if you inp
 Needs to be converted to the type you're expecting.
 
 
+
+## List Comprehensions
+
+Defines a list and its content at the same time. Works typically
+in place of `map()`
+
+
+
+Format:
+
+*new_list = [ <expression> for <member> in <iterable> ]*
+
+E.g.:
+```
+squares = [ i * i for i in range(20)]
+```
+ 
+Can also add conditionasls:
+
+
+*new_list_2 = [ <expresssion> for <member> in <iterable> <if conditional> ]*
+
+Eg.:
+
+```
+sentence = 'the gumtree stood in the bush'
+
+vowels = [ i for i in sentence if i in "aeiou" ]
+
+vowels
+['e', 'u', 'e', 'e', 'o', 'o', 'i', 'e', 'u']
+```
+
+
+
+Can also move the conditional to just after the expresssion, this way you can change the source list values before evaluation:
+
+*new_list3 = [ <expression> <conditional> for <member in <iterable>]*
+
+Example:
+
+```
+>>> original_prices = [1.25, -9.4, 10.22, 3.78, -5.9, 1.16]
+>>> [i if i > 0 else 0 for i in original_prices]
+[1.25, 0, 10.22, 3.78, 0, 1.16]
+```
+
+
+Can also do Set and Dictionary comprehensions (use appropriate brackets). E.g., to return the unique set of vowels in a sentance:
+
+```
+>>> sentence = "the gumstree stood in the bush"
+>>> { i for i in "aeiou"}
+{'o', 'a', 'i', 'e', 'u'}
+   
+```
+
+Dictionary comprehension - define the key in the expression, e.g.
+
+```
+{ i:i*i for i in range(20) }
+{0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25, 6: 36, 7: 49, 8: 64, 9: 81, 10: 100, 11: 121, 12: 144, 13: 169, 14: 196, 15: 225, 16: 256, 17: 289, 18: 324, 19: 361}
+
+```
+
+Python 3.8 introduces a walrus operator (:=) that allows you to assign a value to the member from wthin the conditional.
+
+### When to avoid list comprehensions
+
+* Nested comprehensions
+  * can get complicated to understand, better to use a loop
+* Can consume unexpected amount of memory as it pre-generates the whole list in memory
+  * better to use a **generator**
+  * can also use `map()` which does a lazy evaluation
+  
+   
+
+
+## List Generators and use of yield keyword
+
+Primary use case is to deal iterating over large datasets without loading everything into memory.
+
+Use `yield` instead of `return` in functions to turn function into a iterable. The function runs until a yield statement is encountered and then pauses there while returning the yield value. If there are multiple yield statements, it will pause at each one.
+
+Example:
+
+```
+def infinite_sequence():
+   num = 0
+   while True:
+      yield num
+      num + 1
+```
+The function can now by used as a Iterable when assigned to a var:
+* it has a `next()` method (although, only if generator defined as function; as expression it's 	
+* throws `StopIteration` exception if it reaches the end of its sequence.
+* Once exhausted, has to be recreated in order to reset from beginning.
+
+
+### Generator expressions
+
+Use parentheses `()` to turn a list comprehension into a list generator:
+
+```
+# comprehension
+nums_squared_lc = [ num**2 for num in range(5) ]
+nums_squared_gc = ( num**2 for num in range(5) )
+```
+
+### send(), throw() and close()
+
+`send()` allows you to send a value to a generator. Inside the generator function, this value will be returned by the `yield` keyword.
+
+`close()` - stops the generator prematurely.
+
+
+### Data pipelines with generators
+
+Common use is to limit memory when working with large datasets.
+Can chain generators before reading any data and execute them all in one go:
+
+E.g.:
+
+```
+lines = (line for line in open(file_name))
+list_line = (s.rstrip().split(",") for s in lines)
+cols = next(list_line)
+company_dicts = (dict(zip(cols, data)) for data in list_line)
+funding = (
+  int(company_dict["raisedAmt"])
+  for company_dict in company_dicts
+  if company_dict["round"] == "a"
+)
+
+total_series_a = sum(funding)
+```
+
+
+
+## Functional programming and lambdas
+
+* Functional programming is about using *pure functions* (no side observable side effects) as the primary method of computation.
+* The language needs to be able to pass functions are arguments to other function and return functions (in order to achieve *functinonal composition*)
+
+In Python, functions are already *first class citizens* (i.e. they can be treated as data, just like any variable)
+
+Also supports anonymous functions via `lambda`keyword.
+
+Syntax:
+
+`lambda` <parameter_list>: <expression>
+
+The parameter list is optional
+
+Examples:
+
+```
+# lambda to reverse a list
+
+reverse = lambda s: s[::-1]
+
+reverse("this string")
+>>> 'gnirts siht'
+
+(lambda s: s[::-1])("this string")
+>>> 'gnirts siht'
+
+```
+
+*  The return value from a lambda expression can only be one single expression.
+*  A lambda expression can’t contain statements like assignment or return, nor can it contain control structures such as for, while, if, else, or def.
+*  lambda expression has its own local namespace, so the parameter names don’t conflict with identical names in the global namespace. * A lambda expression can access variables in the global namespace, but it can’t modify them.
+
+
+Auto tuple packing in returns is not supported in lambdas:
+
+This WONT work:
+
+```
+(lambda x: x, x ** 2, x ** 3)(3)
+```
+
+But this will because it's explicit:
+
+```
+(lambda x: (x, x ** 2, x ** 3))(3)
+(lambda x: [x, x ** 2, x ** 3])(3)
+(lambda x: {1: x, 2: x ** 2, 3: x ** 3})(3)
+
+```
+
+
+### map()
+
+* Takes a function and applies it to every element in a list.
+* Returns a iterator (a map object)
+* Often used in place of a loop
+* You have to iterate over the results or call `list()` on it.
+
+Reversing a list of strings:
+
+```
+animals = [ "chicken", "cow", "pig", "dog" ]
+
+list(map(lambda s: s[::-1], animals))
+>>> ['nekcihc', 'woc', 'gip', 'god']
+
+```
+
+Another example:
+
+```
+"+".join(map(str, [1, 2, 3, 4, 5]))
+>>> '1+2+3+4+5'
+```
+
+If additional iterable arguments are passed, function must take that many arguments and is applied to the items from all iterables in parallel. With multiple iterables, the iterator stops when the shortest iterable is exhausted. 
+
+E.g.:
+
+```
+>>> list(
+...     map(
+...         (lambda a, b, c: a + b + c),
+...         [1, 2, 3],
+...         [10, 20, 30],
+...         [100, 200, 300]
+...     )
+... )
+
+```
+
+Would return
+
+```
+[111, 222, 333]
+```
+
+### filter()
+
+* Returns a list of elements from a list for which the given predicate in lambda form is true.
+
+E.g. returning all elements from a list of numbers that are greater than 100:
+
+```
+>>> list(filter(lambda x: x > 100, [1, 111, 2, 222, 3, 333]))
+[111, 222, 333]
+
+```
+Returning all even numbers between 0 and 10:
+
+```
+list(filter(lambda x: x % 2 == 0, range(10)))
+```
+
+Returning all upper case words in a list:
+
+```
+>>> list(filter(lambda s: s.isupper(), animals))
+['CAT', 'DOG', 'EMU']
+```
+
+### reduce()
+
+Not builtin but part of standard library.
+
+Example: sum values (but it's more pythonic to call builtin 'sum()`
+
+
+```
+from functools import reduce
+
+
+reduce(lambda x, y: x + y, [1, 2, 3, 4, 5])
+
+```
+
+
+
 ## Classes
+
+
 
 ### Calling a parent's constructor
 
@@ -872,6 +1275,25 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
 ```
+
+
+### Instance, class and static methods
+
+```
+class MyClass:
+    def method(self):
+        return 'instance method called', self
+
+    @classmethod
+    def classmethod(cls):
+        return 'class method called', cls
+
+    @staticmethod
+    def staticmethod():
+        return 'static method called'
+
+```
+The static method cannot access instance or class properties and is primarily used to namespace stateless methods.
 
 
 

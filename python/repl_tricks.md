@@ -116,4 +116,55 @@ dir()
 dir(modulename)
 ```
 
+# listing all the values from a iterable
+
+```
+list(range(5))
+[0, 1, 2, 3, 4]
+```
+
+
+# Time / profile code
+
+
+Put all the code in a string and add a import statement in the `setup` parameter 
+
+```
+timeit.timeit('vowels = [ i for i in "hello world" if i in "aeiou" ]')
+Out[16]: 0.34642113200970925
+```
+
+Another way is cProfile:
+
+```
+In [5]: import cProfile
+
+In [6]: cProfile.run('[ i for i in "hello world" if i in "aeiou" ]')
+4 function calls in 0.000 seconds
+
+Ordered by: standard name
+
+ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+1    0.000    0.000    0.000    0.000 <string>:1(<listcomp>)
+1    0.000    0.000    0.000    0.000 <string>:1(<module>)
+1    0.000    0.000    0.000    0.000 {built-in method builtins.exec}
+1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+```
+
+
+
+
+
+
+# See how much memory a object is consuming
+
+```
+>>> import sys
+>>> nums_squared_lc = [ num**2 for num in range(10000) ]
+>>> sys.getsizeof(nums_squared_lc)
+>>> 87616
+```
+in bytes
+
+
 
