@@ -19,7 +19,7 @@ Show the absolute path name:
 
 
 Path components:
-
+,
 * `.name`: the file name without any directory
 * `.parent`: the directory containing the file, or the parent directory if path is a directory
 * `.stem`: the file name without the suffix

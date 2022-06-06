@@ -21,3 +21,11 @@ git reset --hard
 git commit --amend
 ```
 
+### Revert a merged PR
+
+
+```
+git revert -m 1 <merge-commit-hash>
+```
+
+The `-m 1` is selecting the main branch as the parent.

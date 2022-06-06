@@ -425,6 +425,35 @@ To declare dependencies between modules, just use the regular `<dependencies>` m
 
 ## Common plugins
 
+### maven resources
+
+Substitute maven variables into resources.
+https://maven.apache.org/plugins/maven-resources-plugin/examples/filter.html
+
+```
+mvn resources:resources
+```
+
+
+```
+<build>
+  <resources>
+    <resource>
+    <directory>src/main/resources</directory>
+    <filtering>true</filtering>
+    </resource>
+  </resources>
+  <testResources>
+    <testResource>
+    <directory>src/it/java</directory>
+    <excludes>
+    <exclude>**/*.java</exclude>
+    </excludes>
+    </testResource>
+  </testResources>
+</build>
+
+```
 
 ### Using surefire testing plugin
 

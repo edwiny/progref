@@ -1,8 +1,14 @@
+# Intellij shortcuts I've found useful
+
+Note these are for Linux.
+
+
 ## Searching
 
 | Key                  | Effect                             |
 | -------------------- | ---------------------------------- |
 | Ctrl-Shift-A         | Find Action - to learn the shortcuts |
+| Shift-Shift (dbl)    | Search everywhere                  |
 
 ## Navigation
 
@@ -12,6 +18,7 @@
 | Ctrl-B               | Go to definition. Press again to go to usages |
 | Ctrl-N               | Nagivate to class                   |
 | Ctrl-Left/Right      | Next/Prev word                      |
+| Go to next error     | F2  / Shift-F2
 
 
 

@@ -1264,6 +1264,21 @@ reduce(lambda x, y: x + y, [1, 2, 3, 4, 5])
 
 
 
+## Conditionals
+
+### match-case (3.10 upwards)
+
+```
+match x:
+        case 'a':
+            return 1
+        case 'b':
+            return 2
+        case _:        
+            return 0   # 0 is the default case if x is not found
+```
+
+
 ## Classes
 
 
