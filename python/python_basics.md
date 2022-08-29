@@ -234,6 +234,20 @@ Traceback (most recent call last):
 TypeError: 'str' object does not support item assignment
 ```
 
+#### String formatting
+
+Old-style %:
+
+```
+"Hello, %s. You are %s." % (name, age)
+```
+
+.format style:
+
+```
+"Hello, {}. You are {}.".format(name, age)
+```
+
 
 #### Interpolating vars into strings aka f-strings
 
@@ -417,6 +431,13 @@ Incl:
 
 NB: unlike String methods, list methods modify the list in place (typically they don't return anything)
 
+**Create empty list**
+
+```
+a = []
+# or
+b = list()
+```
 
 
 **Operators**
