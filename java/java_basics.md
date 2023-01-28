@@ -79,6 +79,15 @@ E.g.
 char[] helloArray = { 'h', 'e', 'l', 'l', 'o', '.' };
 String helloString = new String(helloArray);
 ```
+
+Note you cannot use the index operator on Strings, e.g. this is not valid:
+
+`helloString[2]`.
+
+In stead, use the charAt method:
+
+`helloString.charAt(2)`
+
 #### String Length
 
 Use the String method  `length()`  e.g.
@@ -97,7 +106,7 @@ OR:
 
 
 
-Note: The Java programming language does not permit literal strings to span lines in source files, so you must use the + concatenation operator at the end of each line in a multi-line string. For example:
+Note: The Java programming language does not permit literal strings to span lines in source files, so you must use the + concatenation operator at the end of each line in a multi-line string.
 
 
 ### Literals
