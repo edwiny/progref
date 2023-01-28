@@ -768,7 +768,11 @@ If present, the invocation of another constructor must be the *first line* in th
 
 A class can have multiple constructors, as per the rules of method overloading.
 
-Constructors are optional. The compiler automatically provides a no-argument, default constructor for any class without constructors. This default constructor **will call the no-argument constructor of the superclass**. In this situation, the compiler will complain if the superclass doesn't have a no-argument constructor so you must verify that it does. If your class has no explicit superclass, then it has an implicit superclass of Object, which does have a no-argument constructor.
+Constructors are optional. The compiler automatically provides a no-argument, default constructor for any class without constructors. 
+
+**NOTE**: When you define a constructor, it replaces the default no-args constructor.
+
+This default constructor **will call the no-argument constructor of the superclass**. In this situation, the compiler will complain if the superclass doesn't have a no-argument constructor so you must verify that it does. If your class has no explicit superclass, then it has an implicit superclass of Object, which does have a no-argument constructor.
 
 ### Creating objects
 
