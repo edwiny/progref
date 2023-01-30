@@ -340,7 +340,7 @@ To explicitly remove any excludes in the Maven pom.xml, add the following to the
     </resource>
 </resources>
   
-```  
+```
 
 
 By default the loglevel is set to `INFO`. To configure customer level levels, add config in the `application.properties`.
@@ -582,7 +582,8 @@ public class ContextIntegrationTest {
 
 ### Testing methods and assertions
 
-...
+```
+
     // inside test class
     @Test
     public void whenContextIsLoaded_ThenNoExceptions() {
@@ -1079,7 +1080,7 @@ The `@RequestBody` annotation will place the object in the request body into the
 
   MVC example:
 
-  ```
+```
   @GetMapping("/viewProjectPage")
 public ModelAndView projectPage() {
     ModelAndView modelAndView = new ModelAndView("projectPage");

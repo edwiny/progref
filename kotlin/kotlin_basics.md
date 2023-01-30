@@ -1527,6 +1527,30 @@ class Person(val name: String) {
 
 If a non-abstract class does not declare any constructors (primary or secondary), it will have a generated primary public constructor with no arguments. 
 
+
+### Initialising class properties
+
+Most initialisation outside of the constructer can be done via the top level property initialisation. 
+
+*NOTE*: when initialising the top level properties you can access the constructor parameters.
+
+Tip: Use the `apply()` function / expression in the property initialisers:
+
+```
+// Do
+class UsersClient(baseUrl: String, appName: String) {
+    private val usersUrl = "$baseUrl/users"
+    private val httpClient = HttpClientBuilder.create().apply {
+        setUserAgent(appName)
+        setConnectionTimeToLive(10, TimeUnit.SECONDS)
+    }.build()
+    fun getUsers(){
+        //call service using httpClient and usersUrl
+    }
+}
+```
+
+
 ### Order of initialisation
 
 
@@ -1554,6 +1578,7 @@ By default all classes are final (cannot be inherited). To make it inheritable, 
 
 The base class must be initialised in the class declaration:
 
+NOTE: the constructer argument does not have 'val' or 'var'.
 ```
 open class Base(p: Int)
 
@@ -1616,6 +1641,14 @@ abstract class Rectangle : Polygon() {
 }
 ```
 open is assumed.
+
+
+**Sealed classes and interfaces**
+
+Sealed classes cannot be subclassed from outside of the module where they are declared.
+
+
+
 
 ### Properties
 
@@ -1860,6 +1893,17 @@ for (item in listWithNulls) {
     item?.let { println(it) } // prints Kotlin and ignores null
 }
 ```
+
+There is also filterNotNull()
+
+```
+val intList: List<Int> = nullableList.filterNotNull()
+```
+
+
+Can use `lateinit var` to prevent excessive null checking for non-null type variables that initially won't have a value.
+
+
 
 **Elvis operator**
 

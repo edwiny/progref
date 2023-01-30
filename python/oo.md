@@ -38,4 +38,16 @@ members and methods expected of the interface, then it doesn't have to inherit f
 
 ## Check if a object is of a certain class
 
-```isinstance(object, classname)```
+```
+isinstance(object, classname)
+```
+
+
+
+## Calling super class method
+
+
+```
+super().func()  # no need to add self
+```
+

@@ -68,3 +68,48 @@ from datetime import datetime
 time, file_path = max((f.stat().st_mtime, f) for f in directory.iterdir())
 ```
 
+
+## Regex
+
+
+```
+import re
+
+# returns a match object
+re.search('123', s)
+```
+
+
+Match objects are Truthy:
+
+```
+if re.search('123', s):
+...     print('Found a match.')
+... else:
+...     print('No match.')
+```
+
+Group matching:
+
+
+```
+m = re.search(...)
+
+m.groups()      # returns tuple of groups
+m.group(0)      # returns tuple of groups
+m.group(n]      # returns the n-th group, starting at 1
+```
+
+
+Flags
+```
+re.search('123', s, re.I|re.M)
+
+```
+
+Find all matches (equiv to `/g`):
+
+```
+m = re.findall('(\w+?)=\[(\S+?)]', text, re.M)
+```
+
