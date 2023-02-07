@@ -726,14 +726,23 @@ The Set interface contains only methods inherited from Collection and adds the r
 * `HashSet` - uses hash table to store elements. Best performance but no guarantee about order.
 * `TreeSet` - uses a red-black tree, orders its elements based on their values. Worst performance.
 * `LinkedHashSet `- hash table with a linked list running through it, uses insertion order to order elements. Medium performance.
+* `EnumSet` - specialised set for storing Enum values.
 
 Always refer to the collection as `Set`, not one of the implementations, because
 * you're guaranteed to use only the standard functions
 * provides flexibility to change the implementation later just by changing the constructor
 
 
+#### Immutable Sets
+
+```
+Set<String> emptySet = Set.of();
+Set<String> persons = Set.of("A", "B", "C");
+Set<Integer> numbers = Set.of(100, 200, 300, 400);
+```
 
 #### Set usage examples
+
 
 Suppose you want to deduplicate a list of words:
 
@@ -758,7 +767,6 @@ public class FindDups {
 Using the for-each Construct:
 
 ```
-import java.util.*;
 
 public class FindDups {
     public static void main(String[] args) {
@@ -805,7 +813,9 @@ public static <E> Set<E> removeDups(Collection<E> c) {
 }
 ```
 
-#### Set bulk operations aka set-algebrai operations
+#### Set bulk operations aka set-algebraic operations
+
+NOTE: these are methods on the Collection interface so could be done on all the sub types, not just Sets.
 
 * `s1.containsAll(s2)` — returns true if s2 is a subset of s1
 * `s1.addAll(s2)` - union
@@ -834,6 +844,14 @@ Lists may contain duplicate elements. In addition to the operations inherited fr
 * `listIterator` - iterators
 * 'sublist' - range operations
 
+
+To set at index:
+
+```
+list.set(pos, val);
+```
+
+
 #### List Implementations
 
 * `ArrayList` - faster in most cases
@@ -847,6 +865,32 @@ Inherited froom Collection interface:
 
 * `remove` - always removes first occurrance of element
 * `add` and `addAll` - always appends to end of list
+
+
+Creating immutable lists from initialiser, use the `List.of()` static method:
+
+
+```
+List<String> emptyList = List.of();
+List<String> names = List.of("John", "Joe", "Jack");
+```
+
+Another 2 ways to create a immutable list:
+
+```
+List<String> list = Arrays.asList("mon", "tue");
+
+numbers = Collections.unmodifiableList(numbers);
+```
+
+
+Checking list equality:
+
+```
+Objects.equals(numbers, List.of(1, 2, 3));
+```
+
+
 
 Iterating:
 
@@ -1172,6 +1216,8 @@ The base `Set` class' methods works as normal except that:
 
 
 Range-views on SortedSets are useful because they retain their validity even if the underlying sets are modified (unlike with Lists).
+
+For `subSet(From, to)` the returned subset will contain all elements equal to or greater than the first parameter, and smaller than the second parameter, according to the sort order used by the SortedSet.
 
 You also use objects from the sets to indicate the endpoints, not indices.
 

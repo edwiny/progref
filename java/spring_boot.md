@@ -52,12 +52,36 @@ Depedencies can be passed via:
 
 Dependencies == Bean
 
-## Spring Bean Configuration
+## Spring Beans
+
+**NOTE**: By default, beans are singletons. This means that there is only one object for the whole application. 
+(can be changed.)
+
+
+By default, the name of a bean is the same as the name of the method that produces it. 
 
 ### Configuration Classes
 
 Create a class annotated with `@Configuration` and add methods that return
 instances of the class you want to beanify. Annote each of these methods with `@Bean`.
+
+Example:
+
+```
+
+//Containing class is marked as containing spring configuration
+@Configuration  // or @SpringBootApplication
+public class Customers {
+
+    //Customer class has no special config, it's just a pojo
+
+    @Bean
+    public Customer customer() {
+        return new Customer("joe", "1 Maine Str");
+    }
+}
+
+```
 
 When to use:
 * when you don't want to create a dependency on Spring in your domain classes. All the Spring-specific config goes into the Spring Configration classes.
@@ -67,6 +91,10 @@ When to use:
 ### Component Scanning
 
 Spring Boot can scan for beans to wire if the class is annotated by the `@Component` annotation.
+Contrast wtih configuration class method above, where methods return objects that will become beans.
+
+
+Here you annotate a class with `@Component` and that class will become the bean.
 
 The scanning is configured in the main class (entry point):
 
@@ -104,6 +132,13 @@ When to use:
 * `@Service` - "Interface to operation that stands alone in the model, with no encapsulated state."
 
 
+### @Bean vs @Component
+
+* Use @Bean when you need to create a bean from a 3rd party class where you don't have control over the source code.
+* Use @Bean for classes the just provide configuration (perhaps some static strings).
+* @Component is generally preferred otherwise.
+
+
 ### Auto Instantiation of Spring Platform Beans
 
 It's important to understand that the Spring framework provides the utility of the platform via a bunch of beans that gets instantiated from the platform code.
@@ -126,6 +161,107 @@ To inspect the list of beans that Spring auto configure, add logging to your `ap
 ```
 logging.level.org.springframework.boot.autoconfigure=DEBUG
 ```
+
+
+## The Spring IoC container
+
+The subsystem in Spring responsible for instantiating beans and injecting them as dependencies.
+
+Two high level types:
+
+* BeanFactory (the root interface)
+* ApplicationContext (extends BeanFactory)
+  * Contains the AOP stuff and other features. Preferred.
+  * Common implementation to use is `AnnotationConfigApplicationContext`
+
+
+Normally you would just use the `@SpringBootApplication` annotation to do this, but behind the scenes the
+IoC can be bootstrapped like this:
+
+Say you have this class that you want to create beans of:
+
+
+```
+public class Person {
+
+   private String name;
+
+   public Person(String name) {
+       this.name = name;
+   }
+}
+```
+
+Method 1: Using a Configuration Class
+
+
+Note that @Configuration contains @Component inside.
+
+```
+@Configuration
+public class Config {
+
+    @Bean
+    public Person personMary() {
+        return new Person("Mary");
+    }
+}
+```
+
+
+Create a new spring application from the config class:
+
+```
+public class Application {
+
+    public static void main(String[] args) {
+        var context = new AnnotationConfigApplicationContext(Config.class);
+        System.out.println(Arrays.toString(context.getBeanDefinitionNames()));
+
+        Person p = context.getBean(Person.class);
+
+        //OR
+        context.getBean("personMary"); // returns an Object object
+        context.getBean("personMary", Person.class) // returns a Person object
+    }
+}
+
+```
+
+Method 2: @ComponentScan
+
+
+Just add `@Component` to all classes you want to beanify, and add `@ComponentScan` to the Config class:
+
+```
+
+@Component
+public class Book {
+}
+
+
+//In Configuration class
+@ComponentScan
+@Configuration
+public class ConfigWithComponentScan {
+}
+
+
+//In main Application class:
+var context = new AnnotationConfigApplicationContext(ConfigWithComponentScan.class);
+
+```
+
+Method 3: @SpringBootApplication
+
+
+This is a convenience annotation that invokes @ComponentScan
+
+
+
+
+
+
 
 
 
@@ -246,6 +382,73 @@ Use the `@Qualifier` annotation to arguments where the interface is passed to in
 
 Use the `@Primary` annotation to indicate a primary class.
 
+
+
+### Where to put @Autowire
+
+Several options:
+
+
+Top of constructor:
+
+```
+@Component
+public class Runner implements CommandLineRunner {
+    private final PasswordGenerator generator;
+
+    @Autowired
+    public Runner(PasswordGenerator generator) {
+        this.generator = generator;
+    }
+
+    // run
+}
+```
+
+Before constructor arg:
+
+```
+@Component
+public class Runner implements CommandLineRunner {
+    private final PasswordGenerator generator;
+
+    public Runner(@Autowired PasswordGenerator generator) {
+        this.generator = generator;
+    }
+
+    // run
+}
+```
+
+Directly on the field:
+
+```
+@Component
+public class Runner implements CommandLineRunner {
+
+    @Autowired
+    private PasswordGenerator generator;
+
+    // run
+}
+```
+
+Omit it completely!  
+It is possible because Spring IoC knows all the components and can inject them by the type when it is needed
+
+
+```
+@Component
+public class Runner implements CommandLineRunner {
+    private final PasswordGenerator generator;
+
+    public Runner(PasswordGenerator generator) {
+        this.generator = generator;
+    }
+
+    // run
+}
+```
 
 ## Application Configuration
 

@@ -2,6 +2,9 @@
 
 The running time of an algorithm depends on the input size. The efficiency is expressed in Big-O notation and describes the upper bound of the function's growth rate. This means we can predict the maximum time a algorithm will take given its input size.
 
+Put it another way: an algorithm's performance is measured by its **worst case**.
+
+However, 2 algorithms may have the same worst-case, but different average cases.
 
 ## Common Growth Rates
 

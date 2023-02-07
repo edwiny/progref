@@ -2,6 +2,12 @@
 
 NOTE most of these notes have been assembled from the [Oracle Java Tutorials](https://docs.oracle.com/javase/tutorial/)
 
+## JVM vs JRE vs JDK
+
+* JDK is the superset. It contains the JRE, JVM and the compiler plus other development tools
+* JRE is the JVM + standard libraries
+* JVM is the thing that interprets the compiled byte code.
+
 
 
 ## Types
@@ -372,7 +378,7 @@ Benefits of objects:
 
 ### Syntax
 
-Definition:
+#### Definition
 ```
 class Bicycle {
 
@@ -380,7 +386,7 @@ class Bicycle {
 }
 ```
 
-Inheritance:
+#### Inheritance
 
 ```
 class MountainBike extends Bicycle {
@@ -391,7 +397,7 @@ class MountainBike extends Bicycle {
 }
 ```
 
-Interface:
+#### Interface
 
 An interface is a group of related methods with empty bodies. 
 Implementing an interface allows a class to become more formal about the behavior it promises to provide. Interfaces form a contract between the class and the outside world, and this contract is enforced at build time by the compiler
@@ -431,9 +437,16 @@ class ACMEBicycle implements Bicycle {
 }
 ```
 
- Package:
+#### Package
 
- Package is a namespace that organizes a set of related classes and interfaces. 
+Package is a namespace that organizes a set of related classes and interfaces. 
+
+If no package is specified in a class declaration, the **default package** is used. Classes in the default package cannot be imported in other pacakges!
+
+Note: `java.lang` gets auto imported by the compiler.
+
+
+
 
 
 
@@ -743,6 +756,25 @@ Use of underscores and dollars permitted should not be used (except in constants
 
 A nested class is a member of its enclosing class. Non-static nested classes (inner classes) have access to other members of the enclosing class, even if they are declared private. 
 
+Reasons to use inner classes:
+
+* encapsulation
+* code organisation
+
+The syntax for accessing the outer classes members is a bit funky:
+
+```
+ //outer class is Cat
+ Cat.this.name
+```
+
+To instantiate the inner class from outside, you need to first instantiate the outer class:
+
+```
+Cat cat = new Cat("Princess");
+Cat.Bow bow = cat.new Bow("golden");
+```
+
 Static nested classes do not have access to other members of the enclosing class. As a member of the OuterClass, a nested class can be declared private, public, protected, or package private. (Recall that outer classes can only be declared public or package private.)
 
 
@@ -1012,6 +1044,11 @@ For a good tutorial see http://tutorials.jenkov.com/java/lambda-expressions.html
 
 Lambdas are just anonymous methods where the compiler auto matches type and arguments based on the context where it is expressed.
 
+Another definition:
+
+*Lambdas are functions that are not bound to a function name, but can be assigned to a variable.*
+
+
 One issue with anonymous classes is that if the implementation of your anonymous class is very simple, such as an interface that contains only one method, then the syntax of anonymous classes may seem unwieldy and unclear. In these cases, you're usually trying to pass functionality as an argument to another method, such as what action should be taken when someone clicks a button. Lambda expressions enable you to do this, to treat functionality as method argument, or code as data.
 
 
@@ -1082,6 +1119,8 @@ The function body:
   (a1, a2) -> a1 > a2;
   ```
 
+*NOTE* repeating the above in a different way: if you use braces for the lambda body, you must add a `return`.
+
 Lambda expressions are objects, so you can assign them to vars and pass them around:
 
 ```
@@ -1089,6 +1128,9 @@ MyComparator myComparator = (a1, a2) -> return a1 > a2;
 
 boolean result = myComparator.compare(2, 5);
 ```
+
+NOTE: in Functional Programming, a function that takes another function as parameter or returns a function, is called a **higher-order** function.
+
 
 
 ### method references
@@ -1129,7 +1171,7 @@ Supposed to provide compile time, build-time and runtime instructions to compile
 Syntax:
 
 ```
-//Basic
+//Basic annotation with no arguments or arguments with default values
 @Entity
 
 @Entity(tableName = "vehicles")
@@ -1137,8 +1179,9 @@ Syntax:
 //Convention, if only one argument, to call it 'value'
 @InsertNew(value = "yes")
 
-//Convention is to leave 'value' out
+//If there is only one argument and it is called `value` then you can omit it.
 @InsertNew("yes")
+
 
 ```
 You can place Java annotations above classes, interfaces, methods, method parameters, fields and local variables. Here is an example annotation added above a class definition.
@@ -1419,6 +1462,16 @@ Can use *type inference* to omit the 2nd `Integer` in above example (Java SE 7 a
 Box<Integer> integerBox = new Box<>();
 
 ```
+
+
+Starting with Java 10 we can use `var` to take type inference a bit further in variable declarations:
+
+```
+var obj3 = new GenericType<>("abc");
+```
+`var` will force inference from the assigned value.
+
+
 
 ### Generics in method declarations
 

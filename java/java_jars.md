@@ -1,5 +1,25 @@
 # JAR usage
 
+
+## Structure of a jar
+
+```
+example.jar
+├── META-INF
+│   └── MANIFEST.MF
+├── second
+│   ├── Main.class
+│   └── MyIcon.png
+└── third
+    └── another
+        └── OneMore.class
+```
+
+This jar contains 2 packages:
+* `second`
+* `third.another`
+
+
 ## Creating a jar
 
 with custom manifest:
@@ -41,8 +61,14 @@ Main-Class: Main
 **Warning**: The text file from which you are creating the manifest must end with a new line or carriage return. The last line will not be parsed properly if it does not end with a new line or carriage return.
 
 ## Setting entry point
-Specify class with main function in this header
+
+Specify class with main function in this header. The class name needs be be fully qualified (i.e. contain path / package)
+
 Main-Class: Main
+
+
+If this field is present, you can just start the program with `java -jar my.jar`. 
+Otherwise you need to provide the class path with `java -cp my.jar Main`
 
 
 ## Load classes from another jar into your jars classpath:

@@ -3,8 +3,18 @@
 Gradle build script describes one or more Projects. Each project is made up of different tasks. A task is a piece of work which a build performs.
 
 
+## Quickshart / bootstrap new project
+
+
+```
+gradle init
+```
+
+
 ## Projects
 Grade scripts represent Projects as Project Objects. See [Project](https://docs.gradle.org/current/dsl/org.gradle.api.Project.html)
+
+A project typically is something to be built or deployed.
 
 A project is essentially a collection of Task objects. Each task performs some basic piece of work, such as compiling classes, or running unit tests, or zipping up a WAR file. You add tasks to a project using one of the create() methods.
 
@@ -161,10 +171,31 @@ dependencies {
 
 ```
 dependencies {
-   compile group: 'org.hibernate', name: 'hibernate-core', version: '3.6.7.Final'
+    // This dependency is used by the application.
+    implementation group: 'com.google.guava', name: 'guava', version: '28.0-jre'
+
+    // Use JUnit test framework only for testing
+    testImplementation 'junit:junit:4.12'
+
+    // It is only needed to compile the application
+    compileOnly 'org.projectlombok:lombok:1.18.4'
 }
 
 ```
+
+There are various ways to specify versions:
+
+```
+implementation("com.google.guava:guava:28.0-jre")
+
+implementation "com.google.guava:guava:28.0-jre"
+
+implementation 'com.google.guava:guava:28.0-jre'
+
+def guava_version = "28.0-jre"
+implementation "com.google.guava:guava:$guava_version"
+```
+
 ### Repositories
 
 By default, Gradle does not define any repositories. We have to define at least one repository explicitly.
