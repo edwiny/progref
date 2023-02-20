@@ -70,14 +70,57 @@ public class HelloThread extends Thread {
 }
 ```
 
+
+### Using lambda
+
+
+```
+Thread t3 = new Thread(() -> {
+    System.out.println(String.format("Hello, i'm %s", Thread.currentThread().getName()));
+});
+```
+
+
+## Thread class static methods
+
+
 ### Thread.sleep
 
 Suspends the current thread's execution. Two forms
 * milliseconds
 * nanoseconds
-Sleep time is not precise.
+Sleep time is not precise, and timing of sleep is not neccessarily immediate.
 
-### Handling interrupts
+
+Alternate method:
+
+From java.util.concurrent:
+
+
+```
+TimeUnit.MILLISECONDS.sleep(2000)
+TimeUnit.SECONDS.sleep(2)
+```
+
+
+
+### Thread.currentThread()
+
+Gets the Thread object reference for the currently running thread.
+
+
+### Thread.getName() / .getId() / .isAlive() / .getPriority() / .isDaemon()
+
+Obtain various properties of threads.
+
+NOTE: Difference between regular and daemon thread:
+Java does not wait for daemon threads to finish before exiting.
+
+Priority is a range 1-10.
+
+
+
+## Handling interrupts
 
 It's up to the thread to respond to interrupts and exit it's `run()` method.
 
@@ -108,7 +151,7 @@ if (Thread.interrupted()) {
 ```
 
 
-### Join
+### thread.join()
 
 The instance method 'join()' suspends running in the current thread until the thread whose join was called returns.
 

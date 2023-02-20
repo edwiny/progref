@@ -1079,8 +1079,19 @@ for (Iterator<Type> it = m.keySet().iterator(); it.hasNext(); )
 iterating over the entries:
 
 ```
+//since java 10, use var to let compiler figure out type
+for (var entry: map.entrySet()) {
+    System.out.println(e.getKey() + ": " + e.getValue());
+}
+```
+
+Prior to Java 10:
+
+
+```
 for (Map.Entry<KeyType, ValType> e : m.entrySet())
     System.out.println(e.getKey() + ": " + e.getValue());
+
 ```
 
 

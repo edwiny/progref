@@ -258,11 +258,46 @@ Method 3: @SpringBootApplication
 This is a convenience annotation that invokes @ComponentScan
 
 
+## Bean Scopes
+
+By default, beans are created as Singletons.
+
+
+```
+@Bean
+@Scope("singleton") //OR
+@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+public AtomicInteger createCounter() { /* ... */ }
+```
+
+Prototype returns a new instance every time it's injected:
+
+```
+@Bean
+@Scope("prototype") //OR
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+```
 
 
 
+**Request**
+
+ allows a bean to be created and available for the whole lifecycle of an HTTP request.
+
+**Session**
 
 
+ allows a bean to be created and available for the whole HTTP session that may include a sequence of HTTP requests connected by cookies/session ID into a single session.
+
+
+**Application**
+
+Bean is shared between multiple ApplicationContexts
+
+
+**Websocket**
+
+ available during the complete lifecycle of a WebSocket session.
 
 
 ## Bean Lifecycle
