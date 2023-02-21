@@ -22,3 +22,12 @@ Run the program with boundary input values. Do not forget to consider different 
 Write automated tests that will check the program at the build time.
 
 
+
+## Layered Architecture
+
+* Presentation
+* Business Logic / Domain
+** Service classes act as the glue between Domain and Persistence layers. The idea is that the service will apply business rules, then forward the request to the persistence layer to manipulate the database as required.
+* Persistence
+* Database
+

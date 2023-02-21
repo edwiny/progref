@@ -1,10 +1,15 @@
 # Build REST apis with Spring Boot
 
+
 ## Difference between @Controller and @RestController
 
 @Controller is more generic. If you wanted to return raw JSON data with @Controller you would need to marshall objects into the ResponseBody
 
 @RestController automatically marshalls objects into ResponseBody.
+
+
+Note that Controllers are not multi-thread safe.
+
 
 ## @RequestMapping and variants @GetMapping, @PostMapping
 
@@ -33,8 +38,22 @@ public class ProjectController {
         Project entity = projectService.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return convertToDto(entity);
+        // can also return a custome response:
+        return new ResponseEntity<>(convertToDto(entity), HttpStatus.ACCEPTED);G
     }
-    ...
+
+
+    @PostMapping("/addresses")
+    public void postAddress(@RequestParam String name, @RequestParam String address) {
+        addressBook.put(name, address);
+    }
+
+    @DeleteMapping("/addresses")
+    public String removeAddress(@RequestParam String name) {
+        addressBook.remove(name);
+        return name + " removed from address book!";
+    }
+    
 }
 ```
 
@@ -68,9 +87,9 @@ Aka marshalling / demarshalling
 
  For exampe, *spring-boot-starter-web* brings in *Jackson 2* thereby enabling the corresponding HTTP message converter, which is *MappingJackson2HttpMessageConverter*.
 
- ###  @RequestBody 
+### @RequestBody 
 
- This annotation, provided in the method argument list, indicates that the text in the request body be serialised into the class being annotated:
+This annotation, provided in the method argument list, indicates that the text in the request body be serialised into the class being annotated:
 
 
 ```
@@ -86,7 +105,14 @@ public ProjectDto create(@RequestBody ProjectDto newProject) {
 The JSON fields have to match the class attributes but this can be customised with annotations.
 
 
+To accept other formats in the body:
 
+```
+@PostMapping(value = "/user", consumes = MediaType.APPLICATION_XML_VALUE)
+public String userStatus(@RequestBody UserInfo user) {
+    return String.format("Added User %s", user);
+}
+```
 
 
 ### @ResponseBody
@@ -299,3 +325,8 @@ public void givenNewProject_whenCreated_thenSuccess() {
 
 
 
+## The REST Resource Naming Guide
+
+Good to review if building a new REST service:
+
+https://restfulapi.net/resource-naming/
