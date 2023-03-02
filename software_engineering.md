@@ -31,3 +31,26 @@ Write automated tests that will check the program at the build time.
 * Persistence
 * Database
 
+
+
+## Coupling and Cohesion
+
+
+Tight coupling is when classes have hard dependencies on each other (like instantiating one class inside another class).
+
+Achieve loose coupling with DI and using interfaces.
+
+
+
+Low cohesion is when a class does too many things.
+
+
+Ideally, your objects should have low coupling and high cohesion.
+
+
+Situations that may arise:
+
+
+Making a god object (high cohesion, high coupling) — one object performs all functions.
+Poorly selected boundaries (low cohesion, high coupling) — fragments of code have boundaries, but they also contain classes that shouldn't be included in them.
+Destructive decoupling (low cohesion, low coupling) — parts of code have the lowest coupling possible, but that leads to a lack of focus on your code.

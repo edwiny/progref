@@ -900,6 +900,11 @@ Changing the `actuators` base path:
 management.endpoints.web.base-path=/monitoring
 ```
 
+Display all actuators:
+
+```
+management.endpoints.web.exposure.include=*
+```
 
 
 ### Extending the HealthInfo actuator
@@ -1402,4 +1407,177 @@ public void create(@RequestBody ProjectDto newProject) {
 ```
 
 
+
+## H2 Database
+
+
+
+Dependencies
+
+```
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'com.h2database:h2'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+}
+```
+Configuration is done via the application.properties file:
+
+
+```
+# set driver class
+spring.datasource.driverClassName=org.h2.Driver
+
+# set location of db (file, in-mem):
+spring.datasource.url=jdbc:h2:file:~/sampleDB
+
+# user details
+spring.datasource.username=sa
+spring.datasource.password=abc123
+
+# db type
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+
+# show statements in log
+spring.h2.console.enabled=true  # view at localhost:8080/h2-console, there's another setting that configures the path.
+spring.h2.console.settings.trace=true
+
+# auto create tables via hibernate
+spring.jpa.hibernate.ddl-auto=update
+
+
+# show sql statements issued by application
+spring.jpa.show-sql=true
+
+
+## Handling Exceptions
+
+
+NOTE:
+
+By default, Spring Boot doesn't include the message field in a response. To enable it, add this line in the application.properties file: `server.error.include-message=always`
+
+### Unhandled exceptions
+
+If you just throw a RuntimeException() it will result in 500 INTERNAL ERROR.
+
+### Method1: ResponseStatusException
+
+
+In the controller, throw an exception of type ResponseStatusException:
+
+
+```
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid item selected");
+```
+
+
+Comes in 3 flavours:
+
+
+ResponseStatusException(HttpStatus status)
+ResponseStatusException(HttpStatus status, String reason)
+ResponseStatusException(HttpStatus status, String reason, Throwable cause)
+)
+
+### Method2: Create custom exceptions
+
+Extend from `RuntimeException` and annotate with `@ResponseStatus`:
+
+
+E.g.
+
+```
+@ResponseStatus(code = HttpStatus.BAD_REQUEST)
+class BookNotFoundException extends RuntimeException {
+
+    public BookNotFoundException(String cause) {
+        super(cause);
+    }
+}
+```
+
+
+
+### Customising error returned to user
+
+**WARNING** some of this was outdated by the time I wrote this 2023-02
+
+Create custom class like this:
+
+
+```
+public class CustomErrorMessage {
+    private int statusCode;
+    private LocalDateTime timestamp;
+    private String message;
+    private String description;
+
+    public CustomErrorMessage(
+            int statusCode,
+            LocalDateTime timestamp,
+            String message,
+            String description) {
+
+        this.statusCode = statusCode;
+        this.timestamp = timestamp;
+        this.message = message;
+        this.description = description;
+    }
+
+    //getters....
+}
+```
+
+Method 1: ExceptionHandler in the Controller closs
+
+Note that you can only handle exceptions from this specific controller class.
+
+
+In the Controller class, add a method annotated with `@ExceptionHandler`:
+
+```
+    @ExceptionHandler(FlightNotFoundException.class) //custom exception
+    public ResponseEntity<CustomErrorMessage> handleFlightNotFound(
+            FlightNotFoundException exception, WebRequest request) {
+        CustomErrorMessage msg = new CustomErrorMessage(
+                HttpStatus.NOT_FOUND.value(),
+                LocalDateTime.now(),
+                exception.getMessage(),
+                request.getDescription(false));
+
+        return new ResponseEntity<>(msg, HttpStatus.NOT_FOUND);
+    }
+```
+
+
+To reuse the code for exceptions from other controller classes, implement a dedicated exception controller:
+
+
+```
+@ControllerAdvice
+public class ControllerExceptionHandler {
+
+    @ExceptionHandler(FlightNotFoundException.class)
+    public ResponseEntity<CustomErrorMessage> handleFlightNotFound(
+            FlightNotFoundException e, WebRequest request) {
+
+        CustomErrorMessage body = new CustomErrorMessage(
+                HttpStatus.NOT_FOUND.value(),
+                LocalDateTime.now(),
+                e.getMessage(),
+                request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+}
+```
+
+
+A more advanced version of this that allows us to map even standard java exceptions to HTTP response codes is to
+inherit from abstract class `ResponseEntityExceptionHandler`:
 

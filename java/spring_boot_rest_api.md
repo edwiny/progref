@@ -330,3 +330,63 @@ public void givenNewProject_whenCreated_thenSuccess() {
 Good to review if building a new REST service:
 
 https://restfulapi.net/resource-naming/
+
+
+
+# Using model mapper with DTOs
+
+
+```
+dependencies {
+    implementation 'org.modelmapper:modelmapper:3.1.0'
+}
+```
+
+Inject into service:
+
+```
+public UserService(UserRepository peopleRepository, ModelMapper modelMapper) {
+    this.userRepository = userRepository;
+    this.modelMapper = modelMapper;
+}
+```
+
+
+Write the conversion functions.
+
+
+```
+UserDTO convertUserToDTO(User user) {
+    UserDTO dto = modelMapper.map(user, UserDTO.class);
+    return dto;
+}
+
+User convertDTOToUser(UserDTO dto) {
+    User user = modelMapper.map(dto, User.class);
+    user.setAccountCreatedAt(LocalDate.now());
+    return user;
+}
+```
+
+
+With Lombok, some complications can arise. Here is a config that should work
+
+```
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class UserDTO {
+    private int id;
+    private String username;
+    private LocalDate dateOfBirth;
+}
+```
+
+
+Can also use **records** (JDK 16)
+
+```
+public record UserDTO(int id, String username, LocalDate dateOfBirth) {
+}
+```

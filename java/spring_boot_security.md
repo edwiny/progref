@@ -113,3 +113,185 @@ NOTE: calls to POST are auto protected against CSRF, in development you need to 
 
 
 
+## HTTP Basic auth
+
+
+Server responds with 401 and header 'WWW-Authenticate`.
+Browser resends request after prompting use for username and password, adds the Authorization header.
+
+```
+Authorization: <type> <credentials>
+```
+
+Type is 'Basic' and creds are base64 encoded 'username:password'.
+
+
+## Implementing a custom user store (post Spring Security 5.7)
+
+
+First create a User class:
+
+
+
+
+```
+class User {
+    private String username;
+    private String password;
+    private String role; // should be prefixed with ROLE_
+    //constructor, getters and setters...
+}
+```
+
+
+
+Then create a repo class (Be sure to use threadsafe Map)
+
+```
+@Component
+public class UserRepository {
+    final private Map<String, User> users = new ConcurrentHashMap<>();
+
+    public User findUserByUsername(String username) {
+        return users.get(username);
+    }
+
+    public void save(User user) {
+        users.put(user.getUsername(), user);
+    }
+}
+```
+
+
+Create a registration controller:
+```
+@RestController
+public class RegistrationController {
+    @Autowired
+    UserRepository userRepo;
+    @Autowired
+    PasswordEncoder encoder;    //defined later in security config
+
+    @PostMapping("/register")
+    public void register(@RequestBody User user) {
+        // input validation omitted for brevity
+
+        user.setPassword(encoder.encode(user.getPassword()));
+
+        userRepo.save(user);
+    }
+}
+```
+
+Now we need to implement an interface of `UserDetails` which is what Spring Security knows about users.
+We map our internal `User` representation with authorities.
+
+
+```
+
+public class UserDetailsImpl implements UserDetails {
+    private final String username;
+    private final String password;
+    private final List<GrantedAuthority> rolesAndAuthorities;
+
+    public UserDetailsImpl(User user) {
+        username = user.getUsername();
+        password = user.getPassword();
+        rolesAndAuthorities = List.of(new SimpleGrantedAuthority(user.getRole()));
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return rolesAndAuthorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    // 4 remaining methods that just return true
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+}
+```
+
+
+When now have to implement another Spring interface, the `UserDetailsService`:
+
+
+```
+@Service
+public class UserDetailsServiceImpl implements UserDetailsService {
+    @Autowired
+    UserRepository userRepo;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepo.findByUserName(username);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("Not found: " + username);
+        }
+
+        return new UserDetailsImpl(user);
+    }
+}
+```
+
+Finally, we define the security configuration:
+
+
+```
+@Configuration
+public class SecurityConfiguration {
+
+    @Autowired
+    UserDetailsService userDetailsService;
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf().disable()
+                .authorizeHttpRequests( authz -> {
+                    authz.requestMatchers(new AntPathRequestMatcher("/register"))
+                            .permitAll();
+                    authz.requestMatchers(new AntPathRequestMatcher("/test"))
+                            .hasAnyRole("USER")
+                            .anyRequest()
+                            .authenticated();
+                })
+                .httpBasic(Customizer.withDefaults())
+                .userDetailsService(userDetailsService);
+
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder getEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+}
+
+```
