@@ -382,7 +382,7 @@ True
 * The Boolean value `False`
 * Any value that is numerically zero (0, 0.0, 0.0+0.0j)
 * An empty string
-* An object of a built-in composite data type which is empty (typle, list, dict or set)
+* An object of a built-in composite data type which is empty (tuple, list, dict or set)
 * The `None` keyword
 
 In the REPL, you can check the "truthiness" with:
@@ -1330,6 +1330,7 @@ class MyClass:
 
 ```
 The static method cannot access instance or class properties and is primarily used to namespace stateless methods.
+Typical use case for a class method is a factory method.
 
 
 

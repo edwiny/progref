@@ -2095,6 +2095,48 @@ public interface Comparable<T> {
 Returns a negative integer, zero, or a positive integer as this object is less than, equal to, or greater than the specified object.
 
 
+----------------------------------------------------------------------------------------------
+
+
+## Date/Time managment API
+
+
+### Legacy
+
+
+Get unix time:
+
+```
+long unixTime = System.currentTimeMillis() / 1000L;
+```
+
+
+### Java 8 hotness
+
+Broken down into 2 categories: date/time without zone, date/time with zone
+
+
+```
+LocalDateTime.now();
+LocalDateTime.of(2015, Month.FEBRUARY, 20, 06, 30);
+var localDateTime = LocalDateTime.parse("2015-02-20T06:30:00");
+
+```
+
+with zones:
+
+```
+ZoneId zoneId = ZoneId.of("Europe/Paris");
+ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, zoneId);
+```
+
+
+
+Get unix time:
+
+```
+Instant.now().toEpochMilli()
+```
 
 
 

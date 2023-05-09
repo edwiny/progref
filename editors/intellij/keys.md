@@ -18,7 +18,9 @@ Note these are for Linux.
 | Ctrl-B               | Go to definition. Press again to go to usages |
 | Ctrl-N               | Nagivate to class                   |
 | Ctrl-Left/Right      | Next/Prev word                      |
-| Go to next error     | F2  / Shift-F2
+| Go to next error     | F2  / Shift-F2                      |
+| Ctrl-F11             | Create Mnemonic Bookmark            | 
+| Ctrl-1 ,2,3...       | Go to that bookmark                 |
 
 
 
@@ -29,6 +31,7 @@ Note these are for Linux.
 | Ctrl-Shift-P         | Reveal type of highlighted expresssion |
 | Ctrl-Shift-I         | Show popup window of method definition |
 | Ctrl-Q               | Displays documentation for cursored |
+| Ctrl-Alt-H           | When cursor on method, shows call hierarchy |
 
 ## Copying
 

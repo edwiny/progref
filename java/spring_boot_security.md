@@ -26,6 +26,10 @@ In `application.properties`
 # default user
 spring.security.user.name=someone
 spring.security.user.password=123
+
+# debug
+
+logging.level.org.springframework.security=DEBUG
 ```
 
 ### Configuration: AuthenticationManagerBuilder
@@ -74,7 +78,7 @@ public class WebSecurityConfigurerImpl extends WebSecurityConfigurerAdapter {
 
 Under the hood, a role is String prefixed with ROLE_.
 
-### Configuration: AuthenticationManagerBuilder
+### Configuration: AuthenticationManagerBuilder (pre- spring security 5.7)
 
 NOTE: outdated. See https://spring.io/blog/2022/02/21/spring-security-without-the-websecurityconfigureradapter
 
@@ -109,8 +113,52 @@ public class WebSecurityConfigurerImpl extends WebSecurityConfigurerAdapter {
 
 
 NOTE: calls to POST are auto protected against CSRF, in development you need to add the
-`.csrf().disable()` calls to the HttpSecurity object.
+`.csrf().disable()` calls to the HttpSecurity object, like this:
 
+```
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf().disable()
+        .authorizeHttpRequests(
+                authz -> authz.anyRequest().authenticated()
+        ).httpBasic(Customizer.withDefaults());
+        return http.build();
+}
+```
+
+### Configuration: Using beans with Spring Security v5.7
+
+Example config showing in memory user store with basic auth:
+
+```
+@Configuration
+public class SecurityConfiguration  {
+
+    @Bean
+    public InMemoryUserDetailsManager userDetailsManager() {
+        UserDetails userA = User.withDefaultPasswordEncoder()
+                .username("A")
+                .password("password")
+                .roles("USER")
+                .build();
+        UserDetails userB = User.withDefaultPasswordEncoder()
+                .username("B")
+                .password("password")
+                .roles("USER")
+                .build();
+        return new InMemoryUserDetailsManager(userA, userB);
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf().disable()   //in development only
+        .authorizeHttpRequests(
+                authz -> authz.anyRequest().authenticated()
+        ).httpBasic(Customizer.withDefaults());
+        return http.build();
+    }
+}
+```
 
 
 ## HTTP Basic auth
@@ -295,3 +343,39 @@ public class SecurityConfiguration {
 }
 
 ```
+
+
+
+### Getting details about the authenticated user
+
+#### Method 1: Authentication object injected by Spring
+
+
+Works only in Controllers!
+```
+@GetMapping("/username")
+public void username(Authentication auth) {
+    System.out.println(auth.getName());     
+}
+```
+
+or 
+```
+  @GetMapping("/items")
+    public Set<String> getItems(@AuthenticationPrincipal UserDetails details) {
+        return items.getOrDefault(details.getUsername(), Set.of());
+    }
+```
+
+
+#### Method 2: Via SecurityContext
+
+Works anywhere in the app:
+
+```
+Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+```
+
+More difficult to test, though.
+
+

@@ -68,6 +68,11 @@ To print primitive types use java.io.PrintStream classes `format` and `printf`.
 There is also a Character class that provides methods like `isLetter`, `isDigit`, and `toString`.
 
 
+### Integers
+
+Integer division: /
+Modulus: %
+
 
 ### String
 

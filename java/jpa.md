@@ -2,7 +2,12 @@
 
 Part of the Java EE JDK.
 
-```javax.persistence.*```
+```
+import javax.persistence.*
+```
+
+
+Now called jakarta
 
 ## Mapping Entities
 
