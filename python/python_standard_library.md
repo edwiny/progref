@@ -31,6 +31,34 @@ Other things you can do with a path:
 * `.exists()`
 
 
+## Reading from stdin
+
+`input([<prompt>])`
+
+Does not include a newline.
+
+Note: behaves differently between v2 and v3
+
+Using `sys.stdin`:
+
+
+```
+import sys
+# this is not the python way
+lines = sys.stdin.readlines()
+```
+
+
+```
+import sys
+
+for line in sys.stdin:
+    print(line)
+```
+
+
+
+
 ## Reading a file
 
 ```

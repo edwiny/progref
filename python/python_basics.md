@@ -1,5 +1,13 @@
 # Python basics
 
+## Typing
+
+Python is a strong, dynamically typed language.
+
+Strong because there is no implicit type conversion.
+
+E.g. "1" + 1 == TypeError
+int("1") + 1  == 2
 
 ## Variables
 
@@ -96,13 +104,13 @@ Check for reserved keywords (see `help("keywords")`)
 // - integer division
 % - modulo
 
-There's no `++` or '--` but there are the "augmented assignment operators":
+There's no `++` or '--' but there are the "augmented assignment operators":
+```
 *=
 +=
 -=
 /=
-
-
+```
 
 ## Basic Types
 
@@ -260,9 +268,26 @@ Old-style %:
 Formatting decimal places:
 
 ```
-f"cost $ {price:..2f}"
+f"cost $ {price:.2f}"
+
 ```
 
+Fixed width fields:
+
+```
+>>> print(f"fixed with: {int_num:010}, float: {float_num:.2f}")
+fixed with: 0000000005, float: 3.14
+>>> print(f"fixed with: {int_num:10d}, float: {float_num:.2f}")
+fixed with:          5, float: 3.14
+```
+
+
+
+Self-documenting expressions:
+
+>>> num = 3
+>>> print(f"{num=}")
+num=3
 
 
 #### builtin string functions
@@ -303,7 +328,7 @@ A couple of typical ones:
 `.index()` - similar to find but generates exception if not found
 `.isdigit()`
 '.isspace()`
-'.center()'
+'.center()`
 
 
 #### Converting between strings and lists
@@ -338,7 +363,7 @@ rb'12\34' (length would be 5)
 
 Can create in other ways:
 
-`bytes(8)' - creates a bytes object contain 8 null chars
+`bytes(8)` - creates a bytes object contain 8 null chars
 
 Many of the builtin and string functions also apply to bytes objects.
 
@@ -469,7 +494,9 @@ b = list()
 **Methods with return values**
 
 `l.pop(index)` - removes an element and returns it. By default the index is -1 so last item is removed, but pop(0) will remove the first item.
-`l.index(item)` - returns index of given element or throw exception
+`l.index(item)` - returns index of given element or throw ValueError exception
+
+`e in list` - same as index, no exception
 `l.copy()` - returns shallow copy. Composite elements will get a reference copied.
 
 
@@ -605,7 +632,7 @@ Retrievel uses `[]`:
 
 Remove a entry:
 
-`del ['key1']`
+`del d.['key1']`
 `d.pop('key1')` - removes and returns removed value
 
 
@@ -948,7 +975,7 @@ range(<begin>, <end>, <stride>) returns an iterable that yields integers startin
 
 ### Raising exceptions
 
-````
+```
 
 if some_error_cond:
    raise Exception("error message")
@@ -1177,7 +1204,9 @@ reverse("this string")
 
 *  The return value from a lambda expression can only be one single expression.
 *  A lambda expression can’t contain statements like assignment or return, nor can it contain control structures such as for, while, if, else, or def.
-*  lambda expression has its own local namespace, so the parameter names don’t conflict with identical names in the global namespace. * A lambda expression can access variables in the global namespace, but it can’t modify them.
+*  lambda expression has its own local namespace, so the parameter names don’t conflict with identical names in the global namespace. 
+*  A lambda expression can access variables in the global namespace, but it can’t modify them.
+
 
 
 Auto tuple packing in returns is not supported in lambdas:
@@ -1272,7 +1301,7 @@ Returning all upper case words in a list:
 
 Not builtin but part of standard library.
 
-Example: sum values (but it's more pythonic to call builtin 'sum()`
+Example: sum values (but it's more pythonic to call builtin `sum()`
 
 
 ```

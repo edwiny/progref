@@ -11,6 +11,7 @@ Package is a collection of modules in a directory.
 
 
 
+
 ### Modules
 
 3 types:
@@ -51,12 +52,30 @@ This will overwrite any existing symbols in the caller's namespace with the same
 
 #### Executing a module as a script
 
+Whenever the module is imported, it is fully executed and then added to your current namespace.
+To ensure executing code is executed only within the context of a script, use the __main__ pattern:
+
+
+
 ```
 if (__name__ == '__main__'):
     print('Executing as standalone script')
 ```
 
+A common pattern is to move it to a function:
+
+```
+def main():
+    print("Hello,", name)
+
+if __name__ == "__main__":
+    main()
+```
+
+
 Adding this enables the module to be run as a script, which might be useful to test it from the command line.
+
+
 
 
 
@@ -80,7 +99,9 @@ Importing just `pkg1` has no meaningful effect.
 
 #### Package initialisation
 
-Add the file `__init__.py` 
+Add the file `__init__.py`. Note: this also tells python the directory is to be treated as a package.
+
+
 
 Any variables declared in here is made available as
 
@@ -94,3 +115,27 @@ A list `__all__` in `__init__.py` is taken to be a list of modules that should b
 
 NOTE: before Python 3.3, the prescence of `__init__.py` was neccessary to indicate a directory is a package, but in later versions Implicit Namespace Packages were introducted.
 
+
+
+
+## when to use `__init__.py`
+
+When creating a package (not module). Tells python the directory is to be treated as a package.
+If there are sub packages, each sub folder needs its own `__init__.py`
+
+When doing wildcard imports, you can also constrain the list of modules to import by adding this to the `__init__.py`:
+
+```
+__all__ = ["submodule1", "submodule10"]
+```
+
+
+## Relative imports
+
+```
+from . import artificial    # one dot means addressing to a current package/subpackage
+
+from .. import subpackage2  # two dots mean addressing to a parent package/subpackage
+
+from ..subpackage2 import amazing
+```

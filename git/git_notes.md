@@ -46,6 +46,9 @@ The `-m 1` is selecting the main branch as the parent.
 
 Find the commit where branch diverged from master or where master was merged into the branch, or the branch rebased onto master.
 
+Typically the RHS commit hash if two are listed.
+
+
 Create a `review` branch from that commit:
 
 ```
@@ -64,11 +67,9 @@ Alternatively:
 * create a copy of the feature branch
 * use `git reset --soft <common ancestor commit>`
 
-Explanation: both methods will roll back commits made in the feature branch into the staging index. If you do a 'git status' at this point, it will appear as if you had made the changes in your local working directory and then `staged' the changes in git.
+Explanation: both methods will roll back commits made in the feature branch into the staging index. If you do a 'git status' at this point, it will appear as if you had made the changes in your local working directory and then staged the changes in git.
 
-IDE's like Intellij will pick up on this status and will give you visual cues about which files were changed (in the `Project tool window, you can select 'All changed files' to only show you the files that have changed). There's also the commit preview functionality that can give you side-by-side diff views.
-
-
+IDEs like Intellij will pick up on this status and will give you visual cues about which files were changed (in the Project tool window, you can select 'All changed files' to only show you the files that have changed). There's also the commit preview functionality that can give you side-by-side diff views.
 
 
 

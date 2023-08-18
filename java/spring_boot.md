@@ -125,7 +125,7 @@ When to use:
 
 #### Stereotype annotations
 
-`@Component is a base annotation, there are others flavours that do slightly more specific things:
+`@Component is a base annotation, there are others flavours that do slightly more specific things:`
 
 * `@Component` - the basic type
 * `@Repository` - "Encapsulation of storage, retrieval and search which emulates a collection of objects"

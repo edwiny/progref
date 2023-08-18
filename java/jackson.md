@@ -18,7 +18,7 @@ public class Post {
     private int likes;
     private List<String> comments;
 
-//  contructor, getters, setters
+//  constructor, getters, setters
 }
 
 ...
