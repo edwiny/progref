@@ -20,7 +20,7 @@ resp = requests.post(url, json={}) # will serialise dict to json in request body
 `data` can take
 * dictionary
 * list of 2 element tuples
-* bytyes
+* bytes
 * file like objects
 
 ### Checking success

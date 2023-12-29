@@ -137,9 +137,12 @@ n.toString()
 Kotlin will automatically cast values in an expression to the widest type,
 according to this rule:
 nt
+
+```
 (int, long) -> Long
 (int, float) -> Float
 (*, double) -> Double
+```
 
 The sequence is
 

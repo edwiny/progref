@@ -17,6 +17,9 @@ Duration does not depend on input size.
 Typical algorithms:
 * using a formulae to arrive at an answer
 
+Data structures:
+ * Hash table (search, insert, delete) (avg case)
+
 ### O(log n) logarithmic time
 
 Algorithms that typically divide inputs into halves.

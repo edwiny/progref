@@ -119,6 +119,13 @@ OR:
 
 Note: The Java programming language does not permit literal strings to span lines in source files, so you must use the + concatenation operator at the end of each line in a multi-line string.
 
+#### String formatting
+
+```
+String.format("Welcome to %s!", value);
+```
+
+
 
 ### Literals
 

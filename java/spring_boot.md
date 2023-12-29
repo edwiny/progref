@@ -343,6 +343,9 @@ Very similar to startup phase, we have two methods to hook into the event:
 * `destroyMethod="<name_of_destroy_method>"` parameter to the `@Bean` annotation in the Configuration class.
 
 
+
+
+
 ## Setting up dependencies between beans aka wiring
 
 So Spring will create beans from the classes you've indicated (or contributed to the application context) 

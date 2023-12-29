@@ -32,6 +32,7 @@ Note these are for Linux.
 | Ctrl-Shift-I         | Show popup window of method definition |
 | Ctrl-Q               | Displays documentation for cursored |
 | Ctrl-Alt-H           | When cursor on method, shows call hierarchy |
+| Alt-7                | Displays structure of class enclosing cursor |
 
 ## Copying
 

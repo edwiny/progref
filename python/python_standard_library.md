@@ -59,11 +59,19 @@ for line in sys.stdin:
 
 
 
-## Reading a file
+## Reading and writing files
+
 
 ```
 with open(path, mode='r') as fid:
     lines = [line.strip() for line in fid ]
+    # or
+    print(fd.read())
+
+
+print("The file contents is:")
+with open(filename, "r") as fd:
+    print(fd.read())
 ```
 
 Alternatively, esp if file is large, use a generator which is more memory efficient:
@@ -81,7 +89,35 @@ Other functions:
 * `.write_bytes()`: open the path in binary/bytes mode and write data to it.
 
 
+## Diroctory listings
+
+traditional method:
+
+```
+
+dir = "."
+# just get list of string names
+for file in os.listdir(dir):
+    print(f"Found file {file}")
+
+# get iterator of DirEntry objects
+for fd in os.scandir(dir):
+    print(repr(fd.stat()))
+```
+
+
+Pathlib method:
+
+```
+from pathlib import Path
+p = Path(dir)
+for fd in p.iterdir():
+    print(fd.stat())
+```
+
+
 ## Finding files in a directory (aka globbing)
+
 
 Returns a Iterable:
 
