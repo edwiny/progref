@@ -70,7 +70,11 @@ git revert -m 1 <merge-commit-hash>
 
 The `-m 1` is selecting the main branch as the parent.
 
+### Show default branch on remote repo
 
+```
+git rev-parse --abbrev-ref origin/HEAD
+```
 
 ## Review PR changes
 
