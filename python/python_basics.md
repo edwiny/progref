@@ -605,6 +605,11 @@ sorted(t, key=lambda s: int(s))
 
 There's also a `reverse=True` argument you can pass.
 
+Sorting dictionaries based on value:
+
+```
+sorted_as_list = sorted(result.items(), reverse=True, key=lambda el: el[1])
+```
 
 
 ### Dictionaries
